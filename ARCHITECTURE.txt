@@ -11,7 +11,7 @@ We will explain those words as we use them.
 
 THE BIG PICTURE
 
-Think of Better Barrows as having two main jobs.
+Think of Barrows with Benefits as having two main jobs.
 
 Job 1:
 Notice what is happening in the game.
@@ -23,11 +23,11 @@ For example:
 
 A Skeleton dies.
 
-RuneLite tells Better Barrows that an actor died.
+RuneLite tells Barrows with Benefits that an actor died.
 
-Better Barrows checks whether that actor was a Skeleton in the Barrows tunnels.
+Barrows with Benefits checks whether that actor was a Skeleton in the Barrows tunnels.
 
-If it was, Better Barrows increases the Skeleton kill count.
+If it was, Barrows with Benefits increases the Skeleton kill count.
 
 The overlay can then show the updated information.
 
@@ -50,7 +50,7 @@ A game tick happened.
 A wall object appeared.
 A game interface opened.
 
-Better Barrows has methods that listen for events it cares about.
+Barrows with Benefits has methods that listen for events it cares about.
 
 This is why IntelliJ may sometimes say one of these methods is "never used."
 
@@ -83,9 +83,9 @@ The overlays show that information.
 THE MAIN FILES
 
 
-BetterBarrowsPlugin.java
+BarrowsWithBenefitsPlugin.java
 
-Think of this as the brain of Better Barrows.
+Think of this as the brain of Barrows with Benefits.
 
 It listens for important RuneLite events.
 
@@ -101,7 +101,7 @@ Which tunnel doors currently exist.
 It should usually decide WHAT happened.
 
 
-BetterBarrowsConfig.java
+BarrowsWithBenefitsConfig.java
 
 This contains the settings that the user can change.
 
@@ -110,7 +110,7 @@ For example, a setting might control whether something is shown or which colour 
 Think of this as the plugin's settings menu.
 
 
-BetterBarrowsBrother.java
+BarrowsBrotherLocationData.java
 
 This stores shared information about the six Barrows brothers.
 
@@ -125,28 +125,28 @@ Now the world overlay and minimap could disagree.
 Keeping shared information together reduces that problem.
 
 
-BetterBarrowsOverlay.java
+BarrowsOverlay.java
 
 This draws the main Barrows information in the game world.
 
 For example, it can draw the large coloured surface mound areas.
 
 
-BetterBarrowsHelperOverlay.java
+BarrowsHelperOverlay.java
 
 This draws extra helper information.
 
 This includes things such as tunnel NPC outlines, tunnel door highlights, and puzzle assistance.
 
 
-BetterBarrowsHudOverlay.java
+BarrowsHudOverlay.java
 
 HUD means Heads-Up Display.
 
 In simple terms, this is information shown as a small panel or display rather than attached directly to something in the game world.
 
 
-BetterBarrowsMinimapOverlay.java
+BarrowsMinimapOverlay.java
 
 This draws the D, A, V, T, K, and G markers on the minimap.
 
@@ -157,7 +157,7 @@ HOW MOUND COORDINATES WORK
 
 A coordinate is simply a location.
 
-Better Barrows knows the surface area belonging to each mound.
+Barrows with Benefits knows the surface area belonging to each mound.
 
 The mound sizes currently used are:
 
@@ -175,7 +175,7 @@ The brother's name can then be shown over that area.
 
 HOW BROTHER COLOURS WORK
 
-Better Barrows keeps track of the state of each brother.
+Barrows with Benefits keeps track of the state of each brother.
 
 Red means alive.
 
@@ -200,7 +200,7 @@ HOW TUNNEL DETECTION WORKS
 
 This part needs a little more explanation.
 
-When you search a sarcophagus, Better Barrows remembers which sarcophagus you searched.
+When you search a sarcophagus, Barrows with Benefits remembers which sarcophagus you searched.
 
 It temporarily calls that brother the pending brother.
 
@@ -210,7 +210,7 @@ Pending simply means:
 
 Suppose you search Torag's sarcophagus.
 
-Better Barrows remembers:
+Barrows with Benefits remembers:
 
 "We are currently waiting for the result of searching Torag."
 
@@ -262,7 +262,7 @@ When an NPC dies, RuneLite sends an event.
 
 NPC means Non-Player Character.
 
-Better Barrows checks the NPC that died.
+Barrows with Benefits checks the NPC that died.
 
 It asks questions such as:
 
@@ -304,14 +304,14 @@ Without protection, the counter could go:
 
 even though you only killed one Skeleton.
 
-Better Barrows keeps a temporary collection of NPC objects it already counted.
+Barrows with Benefits keeps a temporary collection of NPC objects it already counted.
 
 If it sees the same NPC again, it does not add another kill.
 
 
 HOW NPC HIGHLIGHTING WORKS
 
-Better Barrows can outline monsters that you still need.
+Barrows with Benefits can outline monsters that you still need.
 
 Suppose your Skeleton target is 2.
 
@@ -340,7 +340,7 @@ A model outline draws around that visible shape.
 
 This looks different from drawing a simple box or rough polygon around the NPC.
 
-Better Barrows uses RuneLite's model-outline system because it gives the desired RuneLite-style outline.
+Barrows with Benefits uses RuneLite's model-outline system because it gives the desired RuneLite-style outline.
 
 
 WHY DRAWING HAPPENS IN AN OVERLAY
@@ -364,18 +364,18 @@ RuneLite tells plugins when certain objects appear in the game scene.
 
 A door is one type of object.
 
-Better Barrows keeps track of the Barrows tunnel doors it cares about.
+Barrows with Benefits keeps track of the Barrows tunnel doors it cares about.
 
 The helper overlay can then draw a highlight on those doors.
 
-Better Barrows does not click them.
+Barrows with Benefits does not click them.
 
 
 HOW PUZZLE HELP WORKS
 
 RuneLite can tell the plugin when certain game interfaces are open.
 
-Better Barrows can inspect the relevant Barrows puzzle information and highlight the answer.
+Barrows with Benefits can inspect the relevant Barrows puzzle information and highlight the answer.
 
 Again, it only shows information.
 
@@ -390,7 +390,7 @@ The minimap is a much smaller view of the area around the player.
 
 RuneLite provides tools for converting a game-world location into a point on the minimap.
 
-Better Barrows uses that conversion and then draws the brother's first letter there.
+Barrows with Benefits uses that conversion and then draws the brother's first letter there.
 
 The important design choice is that the minimap should use the same brother/mound information as the main overlay.
 
@@ -413,7 +413,7 @@ The difference is:
 
 200 death runes.
 
-That difference is what Better Barrows wants to value.
+That difference is what Barrows with Benefits wants to value.
 
 The plugin takes a snapshot of the inventory.
 
@@ -421,7 +421,7 @@ Snapshot simply means:
 
 "Remember what the inventory looks like right now."
 
-When the inventory changes, Better Barrows compares the new quantities with the old quantities.
+When the inventory changes, Barrows with Benefits compares the new quantities with the old quantities.
 
 It only cares about positive changes.
 
@@ -440,7 +440,7 @@ Suppose you click the chest but no expected loot update happens.
 
 Ten minutes later you pick up an unrelated item.
 
-We do not want Better Barrows saying that unrelated item came from the Barrows chest.
+We do not want Barrows with Benefits saying that unrelated item came from the Barrows chest.
 
 So the plugin only waits for the chest-related inventory change for a short time.
 
@@ -472,7 +472,7 @@ WHAT DOES FAIL-SAFE MEAN?
 
 Fail-safe means trying to behave safely when we are not sure what happened.
 
-For Better Barrows, that normally means:
+For Barrows with Benefits, that normally means:
 
 If we are not sure, show less information instead of making something up.
 
@@ -508,7 +508,7 @@ It does NOT automatically mean every feature works correctly inside the game.
 
 For example, code can compile perfectly but still listen for the wrong game event.
 
-That is why Better Barrows needs two types of testing:
+That is why Barrows with Benefits needs two types of testing:
 
 Build testing.
 

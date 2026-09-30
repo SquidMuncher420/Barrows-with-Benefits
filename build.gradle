@@ -14,7 +14,7 @@ repositories {
 }
 
 def runeLiteVersion = 'latest.release'
-def pluginMainClass = 'com.betterbarrows.BetterBarrowsPluginTest'
+def pluginMainClass = 'com.barrowswithbenefits.BarrowsWithBenefitsPluginTest'
 
 dependencies {
 	compileOnly group: 'net.runelite', name:'client', version: runeLiteVersion
@@ -27,7 +27,7 @@ dependencies {
 	testImplementation group: 'net.runelite', name:'jshell', version: runeLiteVersion
 }
 
-group = 'com.betterbarrows'
+group = 'com.barrowswithbenefits'
 
 tasks.withType(JavaCompile).configureEach {
 	options.encoding = 'UTF-8'

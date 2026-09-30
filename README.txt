@@ -2,13 +2,13 @@ BETTER BARROWS
 
 WELCOME
 
-Better Barrows is a RuneLite plugin for Old School RuneScape.
+Barrows with Benefits is a RuneLite plugin for Old School RuneScape.
 
 It is made to make Barrows easier to understand.
 
 If you have never written code before, that is completely fine. This documentation tries to explain everything in normal English instead of assuming you already know Java or RuneLite development.
 
-Better Barrows does not play the game for you.
+Barrows with Benefits does not play the game for you.
 
 It does not click things, move your character, attack monsters, solve puzzles automatically, or open the reward chest for you.
 
@@ -17,7 +17,7 @@ Instead, it watches information that RuneLite can already see and shows that inf
 
 ABOUT ME
 
-Hi, I'm the developer of Better Barrows.
+Hi, I'm the developer of Barrows with Benefits.
 
 I would describe myself as a junior developer and a junior vibe coder.
 
@@ -27,7 +27,7 @@ I have learned by testing things, breaking things, fixing things, reading open-s
 
 I want to be open about that.
 
-Better Barrows was not created perfectly on the first try.
+Barrows with Benefits was not created perfectly on the first try.
 
 Some features have been rewritten several times because testing them inside RuneLite showed problems that were not obvious from simply reading the code.
 
@@ -44,12 +44,12 @@ RuneLite supports plugins.
 
 A plugin is a small piece of software that runs inside RuneLite and adds extra information or useful features.
 
-Better Barrows is one of those plugins.
+Barrows with Benefits is one of those plugins.
 
 
 WHAT DOES BETTER BARROWS DO?
 
-Better Barrows focuses on the Barrows activity in Old School RuneScape.
+Barrows with Benefits focuses on the Barrows activity in Old School RuneScape.
 
 It helps with several parts of a Barrows run.
 
@@ -67,7 +67,7 @@ Guthan
 
 Each brother has a mound on the surface.
 
-Better Barrows can highlight the full area of each mound and show the brother's name.
+Barrows with Benefits can highlight the full area of each mound and show the brother's name.
 
 The colours tell you useful information.
 
@@ -82,7 +82,7 @@ Blue is given priority because knowing where the tunnel is can still be useful e
 
 MINIMAP LETTERS
 
-Better Barrows can also show the brothers on the minimap.
+Barrows with Benefits can also show the brothers on the minimap.
 
 D means Dharok.
 A means Ahrim.
@@ -100,7 +100,7 @@ FINDING THE TUNNEL
 
 One of the Barrows crypts contains the tunnel entrance.
 
-When you search a sarcophagus, Better Barrows remembers which brother's sarcophagus you just searched.
+When you search a sarcophagus, Barrows with Benefits remembers which brother's sarcophagus you just searched.
 
 It then waits to see what happens.
 
@@ -125,14 +125,14 @@ The newer system waits for better evidence instead.
 
 REMEMBERING THE TUNNEL
 
-Once Better Barrows knows which crypt contains the tunnel, it can remember and display that information.
+Once Barrows with Benefits knows which crypt contains the tunnel, it can remember and display that information.
 
 This is useful because you might leave the crypt and later need to remember where the tunnel was.
 
 
 TUNNEL MONSTER KILL TRACKING
 
-Better Barrows can count certain monsters that you kill inside the tunnels.
+Barrows with Benefits can count certain monsters that you kill inside the tunnels.
 
 These include:
 
@@ -145,23 +145,23 @@ Skeleton
 
 You can choose a target number for the monsters you care about.
 
-For example, if your Skeleton target is 2, Better Barrows can count until you have killed two Skeletons.
+For example, if your Skeleton target is 2, Barrows with Benefits can count until you have killed two Skeletons.
 
 
 MONSTER OUTLINES
 
-Better Barrows can highlight tunnel monsters that you still need for your chosen targets.
+Barrows with Benefits can highlight tunnel monsters that you still need for your chosen targets.
 
 The plugin uses RuneLite's model outline system.
 
 In simple terms, this draws an outline around the visible shape of the monster.
 
-When you have reached the target for that monster type, Better Barrows no longer needs to highlight it as a required target.
+When you have reached the target for that monster type, Barrows with Benefits no longer needs to highlight it as a required target.
 
 
 TUNNEL DOORS
 
-Better Barrows can highlight useful doors inside the Barrows tunnels.
+Barrows with Benefits can highlight useful doors inside the Barrows tunnels.
 
 This helps make the maze easier to read.
 
@@ -174,7 +174,7 @@ PUZZLE HELP
 
 The Barrows tunnel can show a puzzle.
 
-Better Barrows can highlight the answer you should choose.
+Barrows with Benefits can highlight the answer you should choose.
 
 It does not click the answer for you.
 
@@ -183,12 +183,12 @@ REWARD POTENTIAL
 
 Barrows has a reward-potential value.
 
-Better Barrows can show this information so it is easier to keep track of during a run.
+Barrows with Benefits can show this information so it is easier to keep track of during a run.
 
 
 CHEST VALUE
 
-When you loot the Barrows reward chest, Better Barrows can calculate the total value of the items you just received.
+When you loot the Barrows reward chest, Barrows with Benefits can calculate the total value of the items you just received.
 
 It is careful not to count items that were already in your inventory.
 
@@ -200,7 +200,7 @@ The chest gives you 200 more.
 
 You now have 1,200 death runes.
 
-Better Barrows should value the 200 new runes, not all 1,200.
+Barrows with Benefits should value the 200 new runes, not all 1,200.
 
 To do this, the plugin remembers what was in your inventory before the loot arrives and compares it with what is there afterwards.
 
@@ -208,12 +208,12 @@ It then adds together the value of the new items.
 
 The result can look like:
 
-Better Barrows: Total chest value: 184,532 gp
+Barrows with Benefits: Total chest value: 184,532 gp
 
 
 WHAT BETTER BARROWS DOES NOT DO
 
-Better Barrows is designed to give information to the player.
+Barrows with Benefits is designed to give information to the player.
 
 It does not automatically:
 
@@ -237,14 +237,14 @@ That is extremely important to this project.
 
 I learned a lot by being able to look at other open-source RuneLite projects.
 
-I want Better Barrows to be understandable in the same way.
+I want Barrows with Benefits to be understandable in the same way.
 
 People should be able to see what it does, report mistakes, suggest improvements, and learn from it.
 
 
 BIG THANK YOU TO THE PROJECTS THAT INSPIRED BETTER BARROWS
 
-Better Barrows was strongly inspired and guided by existing RuneLite and Barrows projects.
+Barrows with Benefits was strongly inspired and guided by existing RuneLite and Barrows projects.
 
 RuneLite and RuneLite Barrows Brothers:
 
@@ -268,7 +268,7 @@ https://runelite.net/plugin-hub/show/barrows-tunnels-kill-tracker
 
 https://github.com/vahnx/barrows-tunnels-kill-tracker
 
-These projects helped me understand what was already possible and strongly guided the ideas and thought process behind Better Barrows.
+These projects helped me understand what was already possible and strongly guided the ideas and thought process behind Barrows with Benefits.
 
 Some were sources of ideas.
 
@@ -295,4 +295,4 @@ ARCHITECTURE.txt explains the code in beginner-friendly language.
 
 CONTRIBUTING.txt explains how you can help.
 
-THIRD_PARTY_NOTICES.txt explains the projects that inspired Better Barrows and why software licences matter.
+THIRD_PARTY_NOTICES.txt explains the projects that inspired Barrows with Benefits and why software licences matter.

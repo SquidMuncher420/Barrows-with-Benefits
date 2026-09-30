@@ -1,6 +1,6 @@
-# Better Barrows
+# Barrows with Benefits
 
-Better Barrows is a RuneLite plugin that brings a collection of useful Barrows helpers together in one place.
+Barrows with Benefits is a RuneLite plugin that brings a collection of useful Barrows helpers together in one place.
 
 The idea is to make a Barrows run easier to follow from start to finish. It keeps track of the brothers you've killed, remembers where your tunnel is, helps while you're moving through the tunnels, and gives you some useful information about your rewards at the end.
 
@@ -23,7 +23,7 @@ Everything can be configured through RuneLite, so you can use the parts you find
 
 ## The Six Brothers
 
-Better Barrows keeps track of Dharok, Ahrim, Verac, Torag, Karil and Guthan throughout your run.
+Barrows with Benefits keeps track of Dharok, Ahrim, Verac, Torag, Karil and Guthan throughout your run.
 
 On the surface, each brother's full diggable mound area can be highlighted and labelled. Rather than drawing a grid of individual tiles, the plugin treats the mound as one area so the overlay stays clean and easy to read.
 
@@ -49,7 +49,7 @@ The minimap isn't maintaining a second set of brother states. It uses the same u
 
 Tunnel detection ended up being one of the more interesting parts of the plugin.
 
-When you search a sarcophagus, Better Barrows remembers which brother you just searched and waits to see what happens next.
+When you search a sarcophagus, Barrows with Benefits remembers which brother you just searched and waits to see what happens next.
 
 If that brother spawns, it knows you've found the normal brother encounter.
 
@@ -59,7 +59,7 @@ There is also a short fallback check to handle situations where the expected gam
 
 This is deliberately a little more careful than simply reacting to one chat message. Earlier versions did that and could incorrectly mark a crypt as the tunnel even when the brother was about to spawn.
 
-Once the tunnel has been confirmed, Better Barrows remembers it and updates the relevant surface and minimap markers.
+Once the tunnel has been confirmed, Barrows with Benefits remembers it and updates the relevant surface and minimap markers.
 
 ---
 
@@ -69,7 +69,7 @@ Once you're underground, the plugin switches its attention towards navigation an
 
 ### Kill Tracker
 
-Better Barrows can track:
+Barrows with Benefits can track:
 
 - Bloodworms
 - Crypt rats
@@ -88,7 +88,7 @@ It also remembers NPC deaths it has already processed. This prevents one monster
 
 The kill tracker also ties into the NPC highlighting.
 
-Better Barrows uses RuneLite's `ModelOutlineRenderer` to draw an outline around tunnel monsters that are still useful for your configured targets.
+Barrows with Benefits uses RuneLite's `ModelOutlineRenderer` to draw an outline around tunnel monsters that are still useful for your configured targets.
 
 For example, if you've asked for two Skeleton kills and you're currently at one, Skeletons can remain highlighted.
 
@@ -100,7 +100,7 @@ This keeps the highlighting tied to what you actually still need rather than per
 
 ## Tunnel Doors
 
-Better Barrows can highlight usable doors inside the Barrows tunnels.
+Barrows with Benefits can highlight usable doors inside the Barrows tunnels.
 
 The plugin listens for the relevant wall objects appearing and disappearing from the game scene and keeps track of the Barrows doors that are currently available.
 
@@ -112,7 +112,7 @@ Nothing is opened automatically — the plugin is only giving you a clearer visu
 
 ## Puzzle Helper
 
-When you reach one of the puzzle doors, Better Barrows can identify the correct answer and highlight it.
+When you reach one of the puzzle doors, Barrows with Benefits can identify the correct answer and highlight it.
 
 This is only a visual helper. The plugin doesn't automatically interact with the puzzle or click the answer for you.
 
@@ -122,7 +122,7 @@ You still make the actual interaction yourself.
 
 ## Reward Potential
 
-Better Barrows can display the game's current Barrows reward potential while you're moving through the tunnels.
+Barrows with Benefits can display the game's current Barrows reward potential while you're moving through the tunnels.
 
 This gives you a quick way of checking your progress without having to keep track of it yourself while deciding whether to continue killing tunnel monsters or head towards the chest.
 
@@ -130,7 +130,7 @@ This gives you a quick way of checking your progress without having to keep trac
 
 ## Chest Value
 
-At the end of the run, Better Barrows can calculate the approximate value of the loot you actually received from the chest.
+At the end of the run, Barrows with Benefits can calculate the approximate value of the loot you actually received from the chest.
 
 This isn't done by simply valuing everything in your inventory.
 
@@ -144,7 +144,7 @@ The newly received items are priced and combined into one total, which is then s
 
 ## Configuration
 
-Most of Better Barrows can be adjusted through RuneLite's normal plugin configuration panel.
+Most of Barrows with Benefits can be adjusted through RuneLite's normal plugin configuration panel.
 
 You can choose which helpers you want to use, set tunnel kill targets, and customise supported colours and display options.
 
@@ -154,7 +154,7 @@ The goal isn't to force one particular way of doing Barrows. If you only want a 
 
 ## Credits
 
-Better Barrows wouldn't have developed into what it is without the RuneLite community and the open-source Barrows plugins that came before it.
+Barrows with Benefits wouldn't have developed into what it is without the RuneLite community and the open-source Barrows plugins that came before it.
 
 A big thank you to:
 
@@ -163,7 +163,7 @@ A big thank you to:
 - **Barrows Sarcophagus Memory** by vahnx
 - **Barrows Tunnels Kill Tracker** by vahnx
 
-These projects have been useful references and a major source of inspiration while learning how RuneLite plugins work and thinking through how the different parts of Better Barrows should behave.
+These projects have been useful references and a major source of inspiration while learning how RuneLite plugins work and thinking through how the different parts of Barrows with Benefits should behave.
 
 Where third-party source has been used or adapted, the original project's licence and copyright still apply.
 
@@ -173,7 +173,7 @@ More detailed attribution and licence information can be found in `THIRD_PARTY_N
 
 ## Licence
 
-Better Barrows is open-source software released under the **BSD 2-Clause License**.
+Barrows with Benefits is open-source software released under the **BSD 2-Clause License**.
 
 **Copyright © 2026 SquidMuncher420**
 
