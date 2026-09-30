@@ -2,7 +2,7 @@ CONTRIBUTING TO BETTER BARROWS
 
 WELCOME
 
-Thank you for wanting to help Better Barrows.
+Thank you for wanting to help Barrows with Benefits.
 
 You do not need to be an expert programmer.
 
@@ -57,25 +57,25 @@ How will I test my change?
 
 A SIMPLE GUIDE TO THE FILES
 
-BetterBarrowsPlugin.java:
+BarrowsWithBenefitsPlugin.java:
 The main brain/state manager.
 
-BetterBarrowsConfig.java:
+BarrowsWithBenefitsConfig.java:
 User settings.
 
-BetterBarrowsBrother.java:
+BarrowsBrotherLocationData.java:
 Shared information about the six brothers.
 
-BetterBarrowsOverlay.java:
+BarrowsOverlay.java:
 Main world/surface drawing.
 
-BetterBarrowsHelperOverlay.java:
+BarrowsHelperOverlay.java:
 Extra helper drawing such as NPCs, doors, and puzzles.
 
-BetterBarrowsHudOverlay.java:
+BarrowsHudOverlay.java:
 Small HUD information.
 
-BetterBarrowsMinimapOverlay.java:
+BarrowsMinimapOverlay.java:
 Minimap brother letters.
 
 
@@ -136,6 +136,6 @@ Comments are especially useful when they explain WHY something unusual exists.
 
 THANK YOU
 
-Better Barrows grew because other developers shared their work.
+Barrows with Benefits grew because other developers shared their work.
 
-Helping make Better Barrows easier for the next beginner to understand is a valuable contribution.
+Helping make Barrows with Benefits easier for the next beginner to understand is a valuable contribution.

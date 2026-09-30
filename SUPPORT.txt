@@ -2,7 +2,7 @@ BETTER BARROWS - HELP AND BUG REPORTS
 
 PROJECT
 
-https://github.com/SquidMuncher420/Better-Barrows
+https://github.com/SquidMuncher420/Barrows-with-Benefits
 
 
 IF SOMETHING DOES NOT WORK
@@ -41,6 +41,6 @@ Build output if the project did not compile.
 
 IMPORTANT
 
-Better Barrows is a third-party RuneLite plugin project.
+Barrows with Benefits is a third-party RuneLite plugin project.
 
 It is not maintained by the RuneLite developers.

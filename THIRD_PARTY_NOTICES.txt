@@ -2,7 +2,7 @@ BETTER BARROWS - THANK YOU, CREDITS, AND LICENSING
 
 WHY THIS FILE EXISTS
 
-Better Barrows was not created in a bubble.
+Barrows with Benefits was not created in a bubble.
 
 I am a junior developer and vibe coder.
 
@@ -31,7 +31,7 @@ Open source does NOT mean:
 
 Different open-source licences have different rules.
 
-If Better Barrows directly uses somebody else's code, we need to follow the licence attached to that code.
+If Barrows with Benefits directly uses somebody else's code, we need to follow the licence attached to that code.
 
 
 RUNELITE
@@ -46,9 +46,9 @@ https://github.com/runelite/runelite/wiki/Barrows-Brothers
 
 RuneLite uses the BSD 2-Clause licence.
 
-RuneLite is the foundation that Better Barrows runs on.
+RuneLite is the foundation that Barrows with Benefits runs on.
 
-RuneLite's existing Barrows features were also a major inspiration for Better Barrows.
+RuneLite's existing Barrows features were also a major inspiration for Barrows with Benefits.
 
 A massive thank you goes to the RuneLite developers and contributors.
 
@@ -69,13 +69,13 @@ Licence:
 
 BSD 2-Clause
 
-This project strongly guided the thinking behind Better Barrows' tunnel door highlighting.
+This project strongly guided the thinking behind Barrows with Benefits' tunnel door highlighting.
 
 Its repository also credits earlier original source from iBelg.
 
 That history should not simply disappear.
 
-If Better Barrows directly contains code adapted from this project, the required BSD licence information and copyright notices must be kept.
+If Barrows with Benefits directly contains code adapted from this project, the required BSD licence information and copyright notices must be kept.
 
 A massive thank you goes to hansjm10 and the earlier work credited to iBelg.
 
@@ -100,7 +100,7 @@ BSD 2-Clause
 
 This plugin strongly influenced the idea of remembering which sarcophagus leads to the tunnels.
 
-That idea helped guide Better Barrows' tunnel memory and tunnel display.
+That idea helped guide Barrows with Benefits' tunnel memory and tunnel display.
 
 A massive thank you goes to vahnx.
 
@@ -125,13 +125,13 @@ Licence:
 
 Not marked as verified in this document.
 
-This plugin strongly influenced the idea behind Better Barrows' tunnel kill tracker.
+This plugin strongly influenced the idea behind Barrows with Benefits' tunnel kill tracker.
 
 A massive thank you goes to vahnx.
 
 We should not guess somebody else's software licence.
 
-Until the individual licence is verified, Better Barrows should describe this project as inspiration rather than claiming a particular licence.
+Until the individual licence is verified, Barrows with Benefits should describe this project as inspiration rather than claiming a particular licence.
 
 If source code from it is ever directly copied or adapted, the licence must be verified first.
 
@@ -150,7 +150,7 @@ does not mean:
 
 "Delete the original credit."
 
-This is why Better Barrows keeps a third-party notices file.
+This is why Barrows with Benefits keeps a third-party notices file.
 
 
 INSPIRATION IS DIFFERENT FROM COPYING CODE
@@ -167,7 +167,7 @@ That is different from opening their Java file, copying their code, changing a f
 
 The second situation involves their source code and therefore its licence matters directly.
 
-Better Barrows should be honest about both kinds of influence.
+Barrows with Benefits should be honest about both kinds of influence.
 
 
 THANK YOU
@@ -188,4 +188,4 @@ These projects were not just feature inspiration.
 
 For me, they were learning material.
 
-Better Barrows exists in its current form because an open-source community gave a junior developer the chance to learn from real projects.
+Barrows with Benefits exists in its current form because an open-source community gave a junior developer the chance to learn from real projects.

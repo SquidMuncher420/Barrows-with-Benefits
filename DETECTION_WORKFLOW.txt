@@ -1,4 +1,4 @@
-Better Barrows tunnel detection workflow
+Barrows with Benefits tunnel detection workflow
 
 1. Player uses Search on a known Barrows sarcophagus.
 2. Plugin records that sarcophagus's brother and a five-second deadline.

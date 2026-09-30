@@ -1,4 +1,4 @@
-Better Barrows - NPC target highlight update
+Barrows with Benefits - NPC target highlight update
 
 - Removed temporary door debugger and its config option.
 - Removed native side-panel tunnel-brother name recolouring and its config option.
@@ -67,7 +67,7 @@ Barrows chest total value
 - The following inventory update is diffed against that snapshot.
 - Only positive item gains are valued, so existing inventory stacks are handled correctly.
 - Every gained stack is valued with RuneLite ItemManager prices and summed into one total.
-- One game-chat message is emitted: "Better Barrows: Total chest value: X gp".
+- One game-chat message is emitted: "Barrows with Benefits: Total chest value: X gp".
 - The pending valuation expires after five game ticks to prevent unrelated later inventory
   changes from being mistaken for Barrows loot.
 - No kill-time chest-value messages were added.
@@ -78,7 +78,7 @@ Compile fix
 
 Minimap brother letters
 - Added D/A/V/T/K/G minimap initials at the centres of the existing mound rectangles.
-- Coordinates come from BetterBarrowsBrother's existing surface data, so minimap and world overlay stay aligned.
+- Coordinates come from BarrowsBrotherLocationData's existing surface data, so minimap and world overlay stay aligned.
 - Status colours match the mound overlay: tunnel colour has priority, then killed, then alive.
 - Uses Arial Bold 12 and RuneLite's Perspective.localToMinimap conversion.
 - Existing chest total value, reliable tunnel kill tracking, model outlines, doors, puzzle helper and tunnel detection retained.

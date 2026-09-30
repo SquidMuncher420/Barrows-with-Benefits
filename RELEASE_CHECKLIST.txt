@@ -79,7 +79,7 @@ Check tunnel door highlights.
 
 Check puzzle answer highlighting.
 
-Make sure Better Barrows does not automatically click either one.
+Make sure Barrows with Benefits does not automatically click either one.
 
 
 STEP 8 - TEST THE CHEST
@@ -99,14 +99,14 @@ Read THIRD_PARTY_NOTICES.txt.
 
 Make sure any source code copied or adapted from another project has the required licence/credit.
 
-Make sure the Better Barrows repository has its final LICENSE file.
+Make sure the Barrows with Benefits repository has its final LICENSE file.
 
 
 STEP 10 - PUSH THE TESTED VERSION
 
 Push the exact tested source to:
 
-https://github.com/SquidMuncher420/Better-Barrows
+https://github.com/SquidMuncher420/Barrows-with-Benefits
 
 The final Git commit gets a unique commit hash.
 

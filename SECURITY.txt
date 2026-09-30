@@ -2,7 +2,7 @@ BETTER BARROWS - SECURITY AND PRIVACY
 
 IN SIMPLE TERMS
 
-Better Barrows is intended to run locally inside RuneLite.
+Barrows with Benefits is intended to run locally inside RuneLite.
 
 It is not intended to collect your password.
 
@@ -17,9 +17,9 @@ If a future version adds internet communication, analytics, telemetry, or anothe
 
 REPORTING A SECURITY PROBLEM
 
-Use the Better Barrows GitHub repository:
+Use the Barrows with Benefits GitHub repository:
 
-https://github.com/SquidMuncher420/Better-Barrows
+https://github.com/SquidMuncher420/Barrows-with-Benefits
 
 Please explain what you found and how it can be reproduced.
 
@@ -28,4 +28,4 @@ RUNELITE PLUGIN HUB REVIEW
 
 RuneLite reviews Plugin Hub submissions for security and game-rule compliance.
 
-That review is useful, but it does not mean Better Barrows can ignore its own responsibility to keep the code understandable and safe.
+That review is useful, but it does not mean Barrows with Benefits can ignore its own responsibility to keep the code understandable and safe.
