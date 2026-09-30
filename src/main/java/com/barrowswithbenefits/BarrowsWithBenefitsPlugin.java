@@ -2,7 +2,7 @@
  * Barrows door ID tracking adapted from Barrows-Door-Highlighter
  * by Jordan Hans (2022), BSD-2-Clause. See THIRD_PARTY_NOTICES.txt.
  */
-package com.betterbarrows;
+package com.barrowswithbenefits;
 
 import com.google.inject.Provides;
 import java.util.Collections;
@@ -87,12 +87,12 @@ import static net.runelite.api.gameval.ObjectID.BARROWS_DOOR_P_L;
 import static net.runelite.api.gameval.ObjectID.BARROWS_DOOR_P_R;
 
 @PluginDescriptor(
-        name = "Better Barrows",
+        name = "Barrows with Benefits",
         description = "Labels Barrows mounds and sarcophagi with each brother's name, colours them red/green by kill "
                 + "status for the current run, and remembers which one leads to the tunnels if you leave pre-maturely.",
         tags = {"barrows", "sarcophagus", "sarcophagi", "tunnel", "memory", "brothers", "kill", "tracker"}
 )
-public class BetterBarrowsPlugin extends Plugin
+public class BarrowsWithBenefitsPlugin extends Plugin
 {
     private static final int ABOVE_GROUND_REGION_ID = 14131;
     private static final int CRYPT_REGION_ID = 14231;
@@ -111,7 +111,7 @@ public class BetterBarrowsPlugin extends Plugin
 
     // Marker added to Jagex's existing top-left Barrows brother list.
     private static final String TUNNEL_LIST_MARKER = " <col=3399ff>◆</col>";
-    private static final String TUNNEL_TRACKER_START = "<br><col=ffffff>Better Barrows tunnel</col>";
+    private static final String TUNNEL_TRACKER_START = "<br><col=ffffff>Barrows with Benefits tunnel</col>";
     private static final int SKELETON_TARGET = 2;
     private static final int BLOODWORM_TARGET = 1;
 
@@ -132,7 +132,7 @@ public class BetterBarrowsPlugin extends Plugin
     private ClientThread clientThread;
 
     @Inject
-    private BetterBarrowsConfig config;
+    private BarrowsWithBenefitsConfig config;
 
     @Inject
     private ConfigManager configManager;
@@ -141,30 +141,30 @@ public class BetterBarrowsPlugin extends Plugin
     private ItemManager itemManager;
 
     @Inject
-    private BetterBarrowsOverlay overlay;
+    private BarrowsOverlay overlay;
 
     @Inject
-    private BetterBarrowsHudOverlay hudOverlay;
+    private BarrowsHudOverlay hudOverlay;
 
     @Inject
-    private BetterBarrowsHelperOverlay helperOverlay;
+    private BarrowsHelperOverlay helperOverlay;
 
     @Inject
-    private BetterBarrowsMinimapOverlay minimapOverlay;
+    private BarrowsMinimapOverlay minimapOverlay;
 
 
     @Inject
     private OverlayManager overlayManager;
 
-    private BetterBarrowsBrother pendingBrother;
+    private BarrowsBrotherLocationData pendingBrother;
     private Map<Integer, Integer> previousInventory = new HashMap<>();
     private boolean barrowsChestLootPending;
     private int chestLootPendingTicks;
     private long pendingBrotherDeadlineNanos;
-    private BetterBarrowsBrother tunnelBrother;
+    private BarrowsBrotherLocationData tunnelBrother;
     private Widget puzzleAnswer;
-    private final Set<BetterBarrowsBrother> emptyBrothers = EnumSet.noneOf(BetterBarrowsBrother.class);
-    private final Set<BetterBarrowsBrother> killedBrothers = EnumSet.noneOf(BetterBarrowsBrother.class);
+    private final Set<BarrowsBrotherLocationData> emptyBrothers = EnumSet.noneOf(BarrowsBrotherLocationData.class);
+    private final Set<BarrowsBrotherLocationData> killedBrothers = EnumSet.noneOf(BarrowsBrotherLocationData.class);
     private int bloodwormKills;
     private int cryptRatKills;
     private int giantCryptRatKills;
@@ -179,9 +179,9 @@ public class BetterBarrowsPlugin extends Plugin
     private final Set<WallObject> barrowsDoors = new HashSet<>();
 
     @Provides
-    BetterBarrowsConfig provideConfig(ConfigManager configManager)
+    BarrowsWithBenefitsConfig provideConfig(ConfigManager configManager)
     {
-        return configManager.getConfig(BetterBarrowsConfig.class);
+        return configManager.getConfig(BarrowsWithBenefitsConfig.class);
     }
 
     @Override
@@ -248,7 +248,7 @@ public class BetterBarrowsPlugin extends Plugin
             return;
         }
 
-        BetterBarrowsBrother clickedBrother = BetterBarrowsBrother.fromSarcophagusObjectId(event.getId());
+        BarrowsBrotherLocationData clickedBrother = BarrowsBrotherLocationData.fromSarcophagusObjectId(event.getId());
         if (clickedBrother == null)
         {
             return;
@@ -331,7 +331,7 @@ public class BetterBarrowsPlugin extends Plugin
             return;
         }
 
-        for (BetterBarrowsBrother brother : BetterBarrowsBrother.values())
+        for (BarrowsBrotherLocationData brother : BarrowsBrotherLocationData.values())
         {
             if (brother.matchesNpcName(npcName))
             {
@@ -360,7 +360,7 @@ public class BetterBarrowsPlugin extends Plugin
                 client.addChatMessage(
                         ChatMessageType.GAMEMESSAGE,
                         "",
-                        "Better Barrows: Total chest value: "
+                        "Barrows with Benefits: Total chest value: "
                                 + QuantityFormatter.formatNumber(totalValue) + " gp",
                         null);
                 barrowsChestLootPending = false;
@@ -528,7 +528,7 @@ public class BetterBarrowsPlugin extends Plugin
     @Subscribe
     public void onConfigChanged(ConfigChanged event)
     {
-        if (!BetterBarrowsConfig.GROUP.equals(event.getGroup()))
+        if (!BarrowsWithBenefitsConfig.GROUP.equals(event.getGroup()))
         {
             return;
         }
@@ -543,22 +543,22 @@ public class BetterBarrowsPlugin extends Plugin
         return puzzleAnswer;
     }
 
-    BetterBarrowsBrother getTunnelBrother()
+    BarrowsBrotherLocationData getTunnelBrother()
     {
         return tunnelBrother;
     }
 
-    boolean isBrotherEmpty(BetterBarrowsBrother brother)
+    boolean isBrotherEmpty(BarrowsBrotherLocationData brother)
     {
         return emptyBrothers.contains(brother);
     }
 
-    boolean isBrotherKilled(BetterBarrowsBrother brother)
+    boolean isBrotherKilled(BarrowsBrotherLocationData brother)
     {
         return killedBrothers.contains(brother);
     }
 
-    private void setTunnelBrother(BetterBarrowsBrother brother)
+    private void setTunnelBrother(BarrowsBrotherLocationData brother)
     {
         if (brother == null)
         {
@@ -572,7 +572,7 @@ public class BetterBarrowsPlugin extends Plugin
             persistEmptyBrothers();
         }
         configManager.setRSProfileConfiguration(
-                BetterBarrowsConfig.GROUP,
+                BarrowsWithBenefitsConfig.GROUP,
                 TUNNEL_BROTHER_CONFIG_KEY,
                 brother.name());
         if (changed)
@@ -593,16 +593,16 @@ public class BetterBarrowsPlugin extends Plugin
         skeletonKills = 0;
         countedTunnelNpcDeaths.clear();
         configManager.unsetRSProfileConfiguration(
-                BetterBarrowsConfig.GROUP,
+                BarrowsWithBenefitsConfig.GROUP,
                 TUNNEL_BROTHER_CONFIG_KEY);
         configManager.unsetRSProfileConfiguration(
-                BetterBarrowsConfig.GROUP,
+                BarrowsWithBenefitsConfig.GROUP,
                 EMPTY_BROTHERS_CONFIG_KEY);
         configManager.unsetRSProfileConfiguration(
-                BetterBarrowsConfig.GROUP,
+                BarrowsWithBenefitsConfig.GROUP,
                 KILLED_BROTHERS_CONFIG_KEY);
         configManager.unsetConfiguration(
-                BetterBarrowsConfig.GROUP,
+                BarrowsWithBenefitsConfig.GROUP,
                 TUNNEL_BROTHER_CONFIG_KEY);
         clearPendingBrother();
     }
@@ -613,7 +613,7 @@ public class BetterBarrowsPlugin extends Plugin
         killedBrothers.clear();
 
         String persistedKilledBrothers = configManager.getRSProfileConfiguration(
-                BetterBarrowsConfig.GROUP,
+                BarrowsWithBenefitsConfig.GROUP,
                 KILLED_BROTHERS_CONFIG_KEY);
 
         if (persistedKilledBrothers != null && !persistedKilledBrothers.trim().isEmpty())
@@ -622,7 +622,7 @@ public class BetterBarrowsPlugin extends Plugin
             {
                 try
                 {
-                    killedBrothers.add(BetterBarrowsBrother.valueOf(value.trim()));
+                    killedBrothers.add(BarrowsBrotherLocationData.valueOf(value.trim()));
                 }
                 catch (IllegalArgumentException ignored)
                 {
@@ -633,7 +633,7 @@ public class BetterBarrowsPlugin extends Plugin
         }
 
         String persistedEmptyBrothers = configManager.getRSProfileConfiguration(
-                BetterBarrowsConfig.GROUP,
+                BarrowsWithBenefitsConfig.GROUP,
                 EMPTY_BROTHERS_CONFIG_KEY);
 
         if (persistedEmptyBrothers != null && !persistedEmptyBrothers.trim().isEmpty())
@@ -642,7 +642,7 @@ public class BetterBarrowsPlugin extends Plugin
             {
                 try
                 {
-                    emptyBrothers.add(BetterBarrowsBrother.valueOf(value.trim()));
+                    emptyBrothers.add(BarrowsBrotherLocationData.valueOf(value.trim()));
                 }
                 catch (IllegalArgumentException ignored)
                 {
@@ -653,7 +653,7 @@ public class BetterBarrowsPlugin extends Plugin
         }
 
         String persistedBrother = configManager.getRSProfileConfiguration(
-                BetterBarrowsConfig.GROUP,
+                BarrowsWithBenefitsConfig.GROUP,
                 TUNNEL_BROTHER_CONFIG_KEY);
 
         if (persistedBrother == null || persistedBrother.isEmpty())
@@ -664,7 +664,7 @@ public class BetterBarrowsPlugin extends Plugin
 
         try
         {
-            tunnelBrother = BetterBarrowsBrother.valueOf(persistedBrother);
+            tunnelBrother = BarrowsBrotherLocationData.valueOf(persistedBrother);
             if (emptyBrothers.remove(tunnelBrother))
             {
                 persistEmptyBrothers();
@@ -674,12 +674,12 @@ public class BetterBarrowsPlugin extends Plugin
         {
             tunnelBrother = null;
             configManager.unsetRSProfileConfiguration(
-                    BetterBarrowsConfig.GROUP,
+                    BarrowsWithBenefitsConfig.GROUP,
                     TUNNEL_BROTHER_CONFIG_KEY);
         }
     }
 
-    private void markBrotherEmpty(BetterBarrowsBrother brother)
+    private void markBrotherEmpty(BarrowsBrotherLocationData brother)
     {
         if (brother == null || brother == tunnelBrother || !emptyBrothers.add(brother))
         {
@@ -689,7 +689,7 @@ public class BetterBarrowsPlugin extends Plugin
         persistEmptyBrothers();
     }
 
-    private void markBrotherKilled(BetterBarrowsBrother brother)
+    private void markBrotherKilled(BarrowsBrotherLocationData brother)
     {
         if (brother == null || !killedBrothers.add(brother))
         {
@@ -704,7 +704,7 @@ public class BetterBarrowsPlugin extends Plugin
         if (killedBrothers.isEmpty())
         {
             configManager.unsetRSProfileConfiguration(
-                    BetterBarrowsConfig.GROUP,
+                    BarrowsWithBenefitsConfig.GROUP,
                     KILLED_BROTHERS_CONFIG_KEY);
             return;
         }
@@ -715,7 +715,7 @@ public class BetterBarrowsPlugin extends Plugin
                 .collect(Collectors.joining(","));
 
         configManager.setRSProfileConfiguration(
-                BetterBarrowsConfig.GROUP,
+                BarrowsWithBenefitsConfig.GROUP,
                 KILLED_BROTHERS_CONFIG_KEY,
                 value);
     }
@@ -725,7 +725,7 @@ public class BetterBarrowsPlugin extends Plugin
         if (emptyBrothers.isEmpty())
         {
             configManager.unsetRSProfileConfiguration(
-                    BetterBarrowsConfig.GROUP,
+                    BarrowsWithBenefitsConfig.GROUP,
                     EMPTY_BROTHERS_CONFIG_KEY);
             return;
         }
@@ -736,7 +736,7 @@ public class BetterBarrowsPlugin extends Plugin
                 .collect(Collectors.joining(","));
 
         configManager.setRSProfileConfiguration(
-                BetterBarrowsConfig.GROUP,
+                BarrowsWithBenefitsConfig.GROUP,
                 EMPTY_BROTHERS_CONFIG_KEY,
                 value);
     }
@@ -775,7 +775,7 @@ public class BetterBarrowsPlugin extends Plugin
             return;
         }
 
-        // Clean up markers/tracker text written by earlier Better Barrows builds.
+        // Clean up markers/tracker text written by earlier Barrows with Benefits builds.
         cleanBetterBarrowsText(brothersWidget);
 
         // Apply the tunnel brother colour once per game tick, after the game has
@@ -983,16 +983,16 @@ public class BetterBarrowsPlugin extends Plugin
             resetMemory();
         }
 
-        syncKilledBrotherFromVarbit(BetterBarrowsBrother.AHRIM, Varbits.BARROWS_KILLED_AHRIM);
-        syncKilledBrotherFromVarbit(BetterBarrowsBrother.DHAROK, Varbits.BARROWS_KILLED_DHAROK);
-        syncKilledBrotherFromVarbit(BetterBarrowsBrother.GUTHAN, Varbits.BARROWS_KILLED_GUTHAN);
-        syncKilledBrotherFromVarbit(BetterBarrowsBrother.KARIL, Varbits.BARROWS_KILLED_KARIL);
-        syncKilledBrotherFromVarbit(BetterBarrowsBrother.TORAG, Varbits.BARROWS_KILLED_TORAG);
-        syncKilledBrotherFromVarbit(BetterBarrowsBrother.VERAC, Varbits.BARROWS_KILLED_VERAC);
+        syncKilledBrotherFromVarbit(BarrowsBrotherLocationData.AHRIM, Varbits.BARROWS_KILLED_AHRIM);
+        syncKilledBrotherFromVarbit(BarrowsBrotherLocationData.DHAROK, Varbits.BARROWS_KILLED_DHAROK);
+        syncKilledBrotherFromVarbit(BarrowsBrotherLocationData.GUTHAN, Varbits.BARROWS_KILLED_GUTHAN);
+        syncKilledBrotherFromVarbit(BarrowsBrotherLocationData.KARIL, Varbits.BARROWS_KILLED_KARIL);
+        syncKilledBrotherFromVarbit(BarrowsBrotherLocationData.TORAG, Varbits.BARROWS_KILLED_TORAG);
+        syncKilledBrotherFromVarbit(BarrowsBrotherLocationData.VERAC, Varbits.BARROWS_KILLED_VERAC);
         lastObservedBrotherKills = currentKills;
     }
 
-    private void syncKilledBrotherFromVarbit(BetterBarrowsBrother brother, int varbit)
+    private void syncKilledBrotherFromVarbit(BarrowsBrotherLocationData brother, int varbit)
     {
         boolean killed = client.getVarbitValue(varbit) > 0;
         if (killed)

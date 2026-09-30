@@ -3,7 +3,7 @@
  * Barrows-Door-Highlighter by Jordan Hans (2022), BSD-2-Clause.
  * See THIRD_PARTY_NOTICES.txt included with this project.
  */
-package com.betterbarrows;
+package com.barrowswithbenefits;
 
 import java.awt.Font;
 import java.awt.BasicStroke;
@@ -25,15 +25,15 @@ import net.runelite.client.ui.overlay.OverlayPosition;
 import net.runelite.client.ui.overlay.outline.ModelOutlineRenderer;
 import net.runelite.client.ui.overlay.OverlayUtil;
 
-final class BetterBarrowsHelperOverlay extends Overlay
+final class BarrowsHelperOverlay extends Overlay
 {
     private final Client client;
-    private final BetterBarrowsPlugin plugin;
-    private final BetterBarrowsConfig config;
+    private final BarrowsWithBenefitsPlugin plugin;
+    private final BarrowsWithBenefitsConfig config;
     private final ModelOutlineRenderer modelOutlineRenderer;
 
     @Inject
-    BetterBarrowsHelperOverlay(Client client, BetterBarrowsPlugin plugin, BetterBarrowsConfig config, ModelOutlineRenderer modelOutlineRenderer)
+    BarrowsHelperOverlay(Client client, BarrowsWithBenefitsPlugin plugin, BarrowsWithBenefitsConfig config, ModelOutlineRenderer modelOutlineRenderer)
     {
         this.client = client;
         this.plugin = plugin;

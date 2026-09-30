@@ -1,4 +1,4 @@
-package com.betterbarrows;
+package com.barrowswithbenefits;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -17,7 +17,7 @@ import net.runelite.client.ui.overlay.OverlayPosition;
 import net.runelite.client.ui.overlay.OverlayUtil;
 
 /** Draws compact brother initials at the six Barrows mounds on the minimap. */
-final class BetterBarrowsMinimapOverlay extends Overlay
+final class BarrowsMinimapOverlay extends Overlay
 {
     private static final int ABOVE_GROUND_REGION_ID = 14131;
     private static final int REGION_BASE_X = 3520;
@@ -25,11 +25,11 @@ final class BetterBarrowsMinimapOverlay extends Overlay
     private static final Font LETTER_FONT = new Font("Arial", Font.BOLD, 12);
 
     private final Client client;
-    private final BetterBarrowsPlugin plugin;
-    private final BetterBarrowsConfig config;
+    private final BarrowsWithBenefitsPlugin plugin;
+    private final BarrowsWithBenefitsConfig config;
 
     @Inject
-    BetterBarrowsMinimapOverlay(Client client, BetterBarrowsPlugin plugin, BetterBarrowsConfig config)
+    BarrowsMinimapOverlay(Client client, BarrowsWithBenefitsPlugin plugin, BarrowsWithBenefitsConfig config)
     {
         this.client = client;
         this.plugin = plugin;
@@ -50,7 +50,7 @@ final class BetterBarrowsMinimapOverlay extends Overlay
         graphics.setFont(LETTER_FONT);
         FontMetrics fm = graphics.getFontMetrics();
 
-        for (BetterBarrowsBrother brother : BetterBarrowsBrother.values())
+        for (BarrowsBrotherLocationData brother : BarrowsBrotherLocationData.values())
         {
             // Use the exact same surface rectangle data as the large mound overlay.
             int centreX = REGION_BASE_X + brother.getSurfaceRegionX()

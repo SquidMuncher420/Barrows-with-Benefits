@@ -1,6 +1,6 @@
-package com.betterbarrows;
+package com.barrowswithbenefits;
 
-enum BetterBarrowsBrother
+enum BarrowsBrotherLocationData
 {
     // Surface dig rectangles are the complete diggable mound areas.
     // Coordinates are region-local south-west corners in Barrows region 14131.
@@ -20,7 +20,7 @@ enum BetterBarrowsBrother
     private final int surfaceDigWidth;
     private final int surfaceDigHeight;
 
-    BetterBarrowsBrother(
+    BarrowsBrotherLocationData(
         String displayName,
         int sarcophagusObjectId,
         int cryptRegionX,
@@ -87,9 +87,9 @@ enum BetterBarrowsBrother
             && (npcName.equals(displayName) || npcName.startsWith(displayName + " "));
     }
 
-    static BetterBarrowsBrother fromSarcophagusObjectId(int objectId)
+    static BarrowsBrotherLocationData fromSarcophagusObjectId(int objectId)
     {
-        for (BetterBarrowsBrother brother : values())
+        for (BarrowsBrotherLocationData brother : values())
         {
             if (brother.sarcophagusObjectId == objectId)
             {

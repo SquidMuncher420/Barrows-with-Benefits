@@ -1,4 +1,4 @@
-package com.betterbarrows;
+package com.barrowswithbenefits;
 
 import java.awt.BasicStroke;
 import java.awt.Color;
@@ -36,7 +36,7 @@ import net.runelite.client.ui.overlay.OverlayUtil;
  * whenever the player walks back into view of a tile (on the surface, going back down, or
  * coming back up) - there is no separate "refresh" step required.
  */
-final class BetterBarrowsOverlay extends Overlay
+final class BarrowsOverlay extends Overlay
 {
     private static final int ABOVE_GROUND_REGION_ID = 14131;
     private static final int CRYPT_REGION_ID = 14231;
@@ -45,14 +45,14 @@ final class BetterBarrowsOverlay extends Overlay
     private static final Stroke OBJECT_STROKE = new BasicStroke(3.0f);
 
     private final Client client;
-    private final BetterBarrowsPlugin plugin;
-    private final BetterBarrowsConfig config;
+    private final BarrowsWithBenefitsPlugin plugin;
+    private final BarrowsWithBenefitsConfig config;
 
     @Inject
-    BetterBarrowsOverlay(
+    BarrowsOverlay(
         Client client,
-        BetterBarrowsPlugin plugin,
-        BetterBarrowsConfig config)
+        BarrowsWithBenefitsPlugin plugin,
+        BarrowsWithBenefitsConfig config)
     {
         this.client = client;
         this.plugin = plugin;
@@ -72,7 +72,7 @@ final class BetterBarrowsOverlay extends Overlay
         }
 
         int regionId = client.getLocalPlayer().getWorldLocation().getRegionID();
-        BetterBarrowsBrother tunnelBrother = plugin.getTunnelBrother();
+        BarrowsBrotherLocationData tunnelBrother = plugin.getTunnelBrother();
 
         if (regionId == ABOVE_GROUND_REGION_ID)
         {
@@ -114,12 +114,12 @@ final class BetterBarrowsOverlay extends Overlay
     private void renderSurfaceDigAreas(
         Graphics2D graphics,
         int regionId,
-        BetterBarrowsBrother tunnelBrother)
+        BarrowsBrotherLocationData tunnelBrother)
     {
         WorldView worldView = client.getLocalPlayer().getWorldView();
         int plane = worldView.getPlane();
 
-        for (BetterBarrowsBrother brother : BetterBarrowsBrother.values())
+        for (BarrowsBrotherLocationData brother : BarrowsBrotherLocationData.values())
         {
             boolean isTunnel = config.showTunnelSarcophagus() && brother == tunnelBrother;
             boolean killed = plugin.isBrotherKilled(brother);
@@ -230,7 +230,7 @@ final class BetterBarrowsOverlay extends Overlay
     {
         WorldView worldView = client.getLocalPlayer().getWorldView();
         int plane = worldView.getPlane();
-        BetterBarrowsBrother tunnelBrother = plugin.getTunnelBrother();
+        BarrowsBrotherLocationData tunnelBrother = plugin.getTunnelBrother();
 
         Scene scene = worldView.getScene();
         Tile[][][] tiles = scene.getTiles();
@@ -243,7 +243,7 @@ final class BetterBarrowsOverlay extends Overlay
         Color previousColor = graphics.getColor();
         graphics.setStroke(OBJECT_STROKE);
 
-        for (BetterBarrowsBrother brother : BetterBarrowsBrother.values())
+        for (BarrowsBrotherLocationData brother : BarrowsBrotherLocationData.values())
         {
             boolean isTunnel = tunnelBrother == brother;
 

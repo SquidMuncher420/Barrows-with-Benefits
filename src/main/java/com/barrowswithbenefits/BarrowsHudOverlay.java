@@ -1,4 +1,4 @@
-package com.betterbarrows;
+package com.barrowswithbenefits;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -18,18 +18,18 @@ import net.runelite.client.ui.overlay.OverlayPosition;
 import net.runelite.client.ui.overlay.OverlayUtil;
 import net.runelite.client.util.Text;
 
-final class BetterBarrowsHudOverlay extends Overlay
+final class BarrowsHudOverlay extends Overlay
 {
     private static final Color COMPLETE_GREEN = new Color(0x66, 0xCC, 0x66);
     private static final int ROW_HEIGHT = 16;
     private static final int DIAMOND_RADIUS = 5;
 
     private final Client client;
-    private final BetterBarrowsPlugin plugin;
-    private final BetterBarrowsConfig config;
+    private final BarrowsWithBenefitsPlugin plugin;
+    private final BarrowsWithBenefitsConfig config;
 
     @Inject
-    BetterBarrowsHudOverlay(Client client, BetterBarrowsPlugin plugin, BetterBarrowsConfig config)
+    BarrowsHudOverlay(Client client, BarrowsWithBenefitsPlugin plugin, BarrowsWithBenefitsConfig config)
     {
         this.client = client;
         this.plugin = plugin;
@@ -65,7 +65,7 @@ final class BetterBarrowsHudOverlay extends Overlay
 
     private void drawTunnelBrother(Graphics2D graphics, Widget brothers, Rectangle bounds)
     {
-        BetterBarrowsBrother tunnel = plugin.getTunnelBrother();
+        BarrowsBrotherLocationData tunnel = plugin.getTunnelBrother();
         if (tunnel == null)
         {
             return;

@@ -1,4 +1,4 @@
-package com.betterbarrows;
+package com.barrowswithbenefits;
 
 import java.awt.Color;
 import net.runelite.client.config.Alpha;
@@ -8,10 +8,10 @@ import net.runelite.client.config.ConfigItem;
 import net.runelite.client.config.ConfigSection;
 import net.runelite.client.config.Range;
 
-@ConfigGroup(BetterBarrowsConfig.GROUP)
-public interface BetterBarrowsConfig extends Config
+@ConfigGroup(BarrowsWithBenefitsConfig.GROUP)
+public interface BarrowsWithBenefitsConfig extends Config
 {
-    String GROUP = "better-barrows";
+    String GROUP = "barrows-with-benefits";
 
     @ConfigSection(
         name = "Brother tiles",
