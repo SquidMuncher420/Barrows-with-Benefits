@@ -1,0 +1,191 @@
+BETTER BARROWS - THANK YOU, CREDITS, AND LICENSING
+
+WHY THIS FILE EXISTS
+
+Better Barrows was not created in a bubble.
+
+I am a junior developer and vibe coder.
+
+Being able to read other open-source RuneLite projects helped me learn.
+
+I want to clearly thank those developers and also explain the important difference between:
+
+Being inspired by somebody's idea.
+
+And:
+
+Copying or adapting somebody's source code.
+
+Those are not the same thing.
+
+
+WHAT IS A SOFTWARE LICENCE?
+
+A software licence is a set of rules from the person or people who own the code.
+
+It explains what other people are allowed to do with that code.
+
+Open source does NOT mean:
+
+"Do anything you want and remove everybody else's name."
+
+Different open-source licences have different rules.
+
+If Better Barrows directly uses somebody else's code, we need to follow the licence attached to that code.
+
+
+RUNELITE
+
+Project:
+
+https://github.com/runelite/runelite
+
+Barrows documentation:
+
+https://github.com/runelite/runelite/wiki/Barrows-Brothers
+
+RuneLite uses the BSD 2-Clause licence.
+
+RuneLite is the foundation that Better Barrows runs on.
+
+RuneLite's existing Barrows features were also a major inspiration for Better Barrows.
+
+A massive thank you goes to the RuneLite developers and contributors.
+
+If actual RuneLite source code is copied or adapted, we must check the licence information attached to that source and keep the notices that the licence requires.
+
+
+BARROWS DOOR HIGHLIGHTER
+
+Project:
+
+https://github.com/hansjm10/Barrows-Door-Highlighter
+
+Developer:
+
+Jordan Hans / hansjm10
+
+Licence:
+
+BSD 2-Clause
+
+This project strongly guided the thinking behind Better Barrows' tunnel door highlighting.
+
+Its repository also credits earlier original source from iBelg.
+
+That history should not simply disappear.
+
+If Better Barrows directly contains code adapted from this project, the required BSD licence information and copyright notices must be kept.
+
+A massive thank you goes to hansjm10 and the earlier work credited to iBelg.
+
+
+BARROWS SARCOPHAGUS MEMORY
+
+Plugin page:
+
+https://runelite.net/plugin-hub/show/barrows-sarcophagus-memory
+
+Source:
+
+https://github.com/vahnx/barrows-sarcophagus-memory
+
+Developer:
+
+vahnx
+
+Licence:
+
+BSD 2-Clause
+
+This plugin strongly influenced the idea of remembering which sarcophagus leads to the tunnels.
+
+That idea helped guide Better Barrows' tunnel memory and tunnel display.
+
+A massive thank you goes to vahnx.
+
+If actual source from this project is copied or adapted, its BSD licence requirements must be followed.
+
+
+BARROWS TUNNELS KILL TRACKER
+
+Plugin page:
+
+https://runelite.net/plugin-hub/show/barrows-tunnels-kill-tracker
+
+Known source location:
+
+https://github.com/vahnx/barrows-tunnels-kill-tracker
+
+Developer:
+
+vahnx
+
+Licence:
+
+Not marked as verified in this document.
+
+This plugin strongly influenced the idea behind Better Barrows' tunnel kill tracker.
+
+A massive thank you goes to vahnx.
+
+We should not guess somebody else's software licence.
+
+Until the individual licence is verified, Better Barrows should describe this project as inspiration rather than claiming a particular licence.
+
+If source code from it is ever directly copied or adapted, the licence must be verified first.
+
+
+WHAT IS BSD 2-CLAUSE?
+
+BSD 2-Clause is a permissive open-source licence.
+
+In simple terms, it allows people to use and modify the covered code, but it still requires important copyright/licence information and the disclaimer to be kept when redistributing covered code.
+
+So:
+
+"Open source"
+
+does not mean:
+
+"Delete the original credit."
+
+This is why Better Barrows keeps a third-party notices file.
+
+
+INSPIRATION IS DIFFERENT FROM COPYING CODE
+
+Imagine you see another plugin that highlights a door.
+
+You think:
+
+"That is a useful idea. I want my plugin to highlight doors too."
+
+Then you write your own implementation.
+
+That is different from opening their Java file, copying their code, changing a few names, and putting it into your project.
+
+The second situation involves their source code and therefore its licence matters directly.
+
+Better Barrows should be honest about both kinds of influence.
+
+
+THANK YOU
+
+A huge thank you goes to:
+
+The RuneLite developers and contributors.
+
+Jordan Hans / hansjm10.
+
+The earlier iBelg work credited by Barrows Door Highlighter.
+
+vahnx.
+
+Everyone who contributes to the RuneLite Plugin Hub ecosystem.
+
+These projects were not just feature inspiration.
+
+For me, they were learning material.
+
+Better Barrows exists in its current form because an open-source community gave a junior developer the chance to learn from real projects.

@@ -1,0 +1,524 @@
+BETTER BARROWS - HOW THE CODE WORKS
+
+WHO IS THIS FILE FOR?
+
+This file is written for someone who is new to programming.
+
+You do not need to already understand RuneLite, Java, events, overlays, or software architecture.
+
+We will explain those words as we use them.
+
+
+THE BIG PICTURE
+
+Think of Better Barrows as having two main jobs.
+
+Job 1:
+Notice what is happening in the game.
+
+Job 2:
+Show useful information about what happened.
+
+For example:
+
+A Skeleton dies.
+
+RuneLite tells Better Barrows that an actor died.
+
+Better Barrows checks whether that actor was a Skeleton in the Barrows tunnels.
+
+If it was, Better Barrows increases the Skeleton kill count.
+
+The overlay can then show the updated information.
+
+That is the basic pattern used throughout the plugin.
+
+
+WHAT IS AN EVENT?
+
+An event is simply RuneLite saying:
+
+"Something just happened."
+
+Examples are:
+
+An NPC appeared.
+An NPC died.
+The player clicked something.
+The inventory changed.
+A game tick happened.
+A wall object appeared.
+A game interface opened.
+
+Better Barrows has methods that listen for events it cares about.
+
+This is why IntelliJ may sometimes say one of these methods is "never used."
+
+IntelliJ may not see normal Java code directly calling the method.
+
+RuneLite calls it through its event system.
+
+So never delete a RuneLite event method just because IntelliJ says it looks unused without first checking what it does.
+
+
+WHAT IS AN OVERLAY?
+
+An overlay is something a RuneLite plugin draws on top of the normal game.
+
+Examples include:
+
+A coloured mound.
+Text above an area.
+A monster outline.
+A highlighted door.
+A letter on the minimap.
+
+The important idea is:
+
+The main plugin works out what is happening.
+
+The overlays show that information.
+
+
+THE MAIN FILES
+
+
+BetterBarrowsPlugin.java
+
+Think of this as the brain of Better Barrows.
+
+It listens for important RuneLite events.
+
+It remembers things such as:
+
+Which brothers have been killed.
+Which sarcophagus was just searched.
+Which brother has the tunnel.
+How many tunnel monsters have been killed.
+Whether the plugin is waiting for chest loot.
+Which tunnel doors currently exist.
+
+It should usually decide WHAT happened.
+
+
+BetterBarrowsConfig.java
+
+This contains the settings that the user can change.
+
+For example, a setting might control whether something is shown or which colour is used.
+
+Think of this as the plugin's settings menu.
+
+
+BetterBarrowsBrother.java
+
+This stores shared information about the six Barrows brothers.
+
+Instead of writing Dharok's location separately in five different files, we try to keep that information in one central place.
+
+This is useful because duplicated information can become inconsistent.
+
+Imagine one file says a mound is at position A but another file says it is at position B.
+
+Now the world overlay and minimap could disagree.
+
+Keeping shared information together reduces that problem.
+
+
+BetterBarrowsOverlay.java
+
+This draws the main Barrows information in the game world.
+
+For example, it can draw the large coloured surface mound areas.
+
+
+BetterBarrowsHelperOverlay.java
+
+This draws extra helper information.
+
+This includes things such as tunnel NPC outlines, tunnel door highlights, and puzzle assistance.
+
+
+BetterBarrowsHudOverlay.java
+
+HUD means Heads-Up Display.
+
+In simple terms, this is information shown as a small panel or display rather than attached directly to something in the game world.
+
+
+BetterBarrowsMinimapOverlay.java
+
+This draws the D, A, V, T, K, and G markers on the minimap.
+
+It takes a position in the game world and asks RuneLite where that position should appear on the minimap.
+
+
+HOW MOUND COORDINATES WORK
+
+A coordinate is simply a location.
+
+Better Barrows knows the surface area belonging to each mound.
+
+The mound sizes currently used are:
+
+Dharok: 6 by 6 tiles.
+Verac: 5 by 6 tiles.
+Ahrim: 6 by 7 tiles.
+Guthan: 7 by 5 tiles.
+Torag: 5 by 4 tiles.
+Karil: 7 by 7 tiles.
+
+Instead of drawing 36 obvious little boxes for a 6 by 6 mound, the plugin tries to make the tiles look like one combined highlighted area.
+
+The brother's name can then be shown over that area.
+
+
+HOW BROTHER COLOURS WORK
+
+Better Barrows keeps track of the state of each brother.
+
+Red means alive.
+
+Green means killed.
+
+Blue means tunnel.
+
+Blue wins if more than one state could apply.
+
+Why?
+
+Imagine you killed Dharok but Dharok's crypt is also the tunnel entrance.
+
+Knowing Dharok is dead is useful.
+
+But knowing where the tunnel entrance is can be even more useful when you return to the surface.
+
+So the mound stays blue.
+
+
+HOW TUNNEL DETECTION WORKS
+
+This part needs a little more explanation.
+
+When you search a sarcophagus, Better Barrows remembers which sarcophagus you searched.
+
+It temporarily calls that brother the pending brother.
+
+Pending simply means:
+
+"We are waiting to find out what happened."
+
+Suppose you search Torag's sarcophagus.
+
+Better Barrows remembers:
+
+"We are currently waiting for the result of searching Torag."
+
+If Torag appears, the plugin knows it was a normal Torag encounter.
+
+If the hidden tunnel interaction appears instead, the plugin knows Torag's crypt contains the tunnel.
+
+There is also a five-second backup timer.
+
+Why is there a timer?
+
+Because real testing showed that using only one chat message was not reliable enough.
+
+An old version treated:
+
+"You don't find anything."
+
+as proof of the tunnel.
+
+That turned out to be wrong in some situations.
+
+The plugin could mark Torag blue and then Torag could still appear.
+
+The newer logic therefore tries to use stronger evidence.
+
+
+WHAT DOES "STATE" MEAN?
+
+You will see the word state a lot in programming.
+
+State simply means information the program is remembering right now.
+
+Examples:
+
+Dharok is dead.
+
+Torag is the tunnel brother.
+
+The player has killed one Skeleton.
+
+The plugin is waiting for a chest inventory update.
+
+All of those are pieces of state.
+
+
+HOW TUNNEL KILL TRACKING WORKS
+
+When an NPC dies, RuneLite sends an event.
+
+NPC means Non-Player Character.
+
+Better Barrows checks the NPC that died.
+
+It asks questions such as:
+
+Is this one of the monster types we track?
+
+Was this NPC actually in the Barrows tunnel?
+
+Have we already counted this exact NPC?
+
+If the answers are correct, the count goes up.
+
+
+WHY CHECK THE NPC'S LOCATION?
+
+An older idea was to check where the player was standing when the monster died.
+
+That sounds reasonable, but it can cause problems.
+
+The player can move.
+
+The death event can happen around the same time.
+
+The NPC itself is the thing we are trying to classify.
+
+So checking the dying NPC's location is more directly connected to the question we are asking.
+
+
+WHY REMEMBER WHICH NPCS WERE ALREADY COUNTED?
+
+Imagine one Skeleton dies.
+
+Because of an unexpected event or programming mistake, the same Skeleton gets processed twice.
+
+Without protection, the counter could go:
+
+0
+1
+2
+
+even though you only killed one Skeleton.
+
+Better Barrows keeps a temporary collection of NPC objects it already counted.
+
+If it sees the same NPC again, it does not add another kill.
+
+
+HOW NPC HIGHLIGHTING WORKS
+
+Better Barrows can outline monsters that you still need.
+
+Suppose your Skeleton target is 2.
+
+You have killed 0.
+
+Skeletons can be highlighted.
+
+You kill one.
+
+Your count is now 1 out of 2.
+
+Skeletons are still useful, so they can remain highlighted.
+
+You kill another.
+
+Your count is now 2 out of 2.
+
+You reached your target, so Skeletons no longer need to be highlighted as required targets.
+
+
+WHAT IS A MODEL OUTLINE?
+
+A model is the 3D shape RuneLite uses to display something like an NPC.
+
+A model outline draws around that visible shape.
+
+This looks different from drawing a simple box or rough polygon around the NPC.
+
+Better Barrows uses RuneLite's model-outline system because it gives the desired RuneLite-style outline.
+
+
+WHY DRAWING HAPPENS IN AN OVERLAY
+
+A game tick is useful for updating information.
+
+But the screen is drawn more often than one game tick.
+
+If we want a highlight to remain visible smoothly, we draw it as part of the overlay.
+
+A simple way to remember this is:
+
+Events update information.
+
+Overlays draw information.
+
+
+HOW DOOR HIGHLIGHTING WORKS
+
+RuneLite tells plugins when certain objects appear in the game scene.
+
+A door is one type of object.
+
+Better Barrows keeps track of the Barrows tunnel doors it cares about.
+
+The helper overlay can then draw a highlight on those doors.
+
+Better Barrows does not click them.
+
+
+HOW PUZZLE HELP WORKS
+
+RuneLite can tell the plugin when certain game interfaces are open.
+
+Better Barrows can inspect the relevant Barrows puzzle information and highlight the answer.
+
+Again, it only shows information.
+
+The player still clicks the answer.
+
+
+HOW THE MINIMAP LETTERS WORK
+
+A mound exists at a location in the game world.
+
+The minimap is a much smaller view of the area around the player.
+
+RuneLite provides tools for converting a game-world location into a point on the minimap.
+
+Better Barrows uses that conversion and then draws the brother's first letter there.
+
+The important design choice is that the minimap should use the same brother/mound information as the main overlay.
+
+We do not want two separate versions of the truth.
+
+
+HOW CHEST VALUE WORKS
+
+This is easiest to explain with an example.
+
+Before opening the chest you have:
+
+1,000 death runes.
+
+After receiving the loot you have:
+
+1,200 death runes.
+
+The difference is:
+
+200 death runes.
+
+That difference is what Better Barrows wants to value.
+
+The plugin takes a snapshot of the inventory.
+
+Snapshot simply means:
+
+"Remember what the inventory looks like right now."
+
+When the inventory changes, Better Barrows compares the new quantities with the old quantities.
+
+It only cares about positive changes.
+
+If an item increased by 200, then 200 of that item was gained.
+
+RuneLite's item-price information can then be used to estimate the value.
+
+All newly gained items are added together.
+
+That creates one total chest value.
+
+
+WHY DOES CHEST TRACKING EXPIRE?
+
+Suppose you click the chest but no expected loot update happens.
+
+Ten minutes later you pick up an unrelated item.
+
+We do not want Better Barrows saying that unrelated item came from the Barrows chest.
+
+So the plugin only waits for the chest-related inventory change for a short time.
+
+After that, the pending chest state is cleared.
+
+
+TEMPORARY INFORMATION AND LONGER-TERM INFORMATION
+
+Not everything should be remembered forever.
+
+For example:
+
+"Which NPCs have already been counted?"
+
+is temporary.
+
+"Which chest interaction are we waiting for?"
+
+is very temporary.
+
+"Which brother is the tunnel?"
+
+may need to be remembered for longer.
+
+Good software tries to keep these different types of information separate.
+
+
+WHAT DOES FAIL-SAFE MEAN?
+
+Fail-safe means trying to behave safely when we are not sure what happened.
+
+For Better Barrows, that normally means:
+
+If we are not sure, show less information instead of making something up.
+
+If we cannot safely identify an NPC, do not add a fake kill.
+
+If a minimap position cannot be calculated, do not draw a marker in a random place.
+
+If an inventory change cannot safely be linked to the chest, do not invent a chest value.
+
+
+WHAT DOES DEPRECATED MEAN?
+
+Sometimes IntelliJ may say a RuneLite API is deprecated.
+
+Deprecated means:
+
+"This still exists, but there is now a newer or preferred way to do it."
+
+It does not always mean the code is immediately broken.
+
+It does mean that the code should eventually be updated because the old API may disappear in the future.
+
+
+WHAT DOES BUILD SUCCESSFUL MEAN?
+
+When Gradle says:
+
+BUILD SUCCESSFUL
+
+it means the source code successfully compiled and passed the build tasks that were run.
+
+It does NOT automatically mean every feature works correctly inside the game.
+
+For example, code can compile perfectly but still listen for the wrong game event.
+
+That is why Better Barrows needs two types of testing:
+
+Build testing.
+
+Real in-game testing.
+
+
+THE MOST IMPORTANT RULE FOR FUTURE DEVELOPERS
+
+Before deleting strange-looking code, find out why it exists.
+
+A timer, extra check, temporary collection, or unusual condition may have been added because a simpler version caused a real bug.
+
+Read DEVELOPMENT_NOTES.txt before simplifying important detection code.

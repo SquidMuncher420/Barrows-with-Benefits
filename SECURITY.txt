@@ -1,0 +1,31 @@
+BETTER BARROWS - SECURITY AND PRIVACY
+
+IN SIMPLE TERMS
+
+Better Barrows is intended to run locally inside RuneLite.
+
+It is not intended to collect your password.
+
+It is not intended to collect authentication tokens.
+
+It is not intended to send your private information to an outside server.
+
+It is not intended to include analytics or tracking.
+
+If a future version adds internet communication, analytics, telemetry, or another external service, that should be clearly explained and reviewed before release.
+
+
+REPORTING A SECURITY PROBLEM
+
+Use the Better Barrows GitHub repository:
+
+https://github.com/SquidMuncher420/Better-Barrows
+
+Please explain what you found and how it can be reproduced.
+
+
+RUNELITE PLUGIN HUB REVIEW
+
+RuneLite reviews Plugin Hub submissions for security and game-rule compliance.
+
+That review is useful, but it does not mean Better Barrows can ignore its own responsibility to keep the code understandable and safe.

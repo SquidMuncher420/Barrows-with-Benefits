@@ -1,0 +1,141 @@
+CONTRIBUTING TO BETTER BARROWS
+
+WELCOME
+
+Thank you for wanting to help Better Barrows.
+
+You do not need to be an expert programmer.
+
+Useful help can include:
+
+Reporting a bug.
+Explaining a RuneLite API.
+Testing a feature.
+Improving documentation.
+Finding confusing code.
+Suggesting a safer or simpler approach.
+Writing code.
+
+
+IF YOU FIND A BUG
+
+Please explain:
+
+What were you doing?
+
+What did you expect to happen?
+
+What actually happened?
+
+Can you make it happen again?
+
+Which part of Barrows were you in?
+
+Do you have a screenshot?
+
+Do you have RuneLite logs or build output?
+
+Clear reproduction steps are extremely helpful.
+
+"Reproduction steps" simply means instructions another person can follow to make the same bug happen.
+
+
+BEFORE CHANGING CODE
+
+Try to answer:
+
+What problem am I fixing?
+
+Which file is responsible for that problem?
+
+Why does the current code work this way?
+
+Was the strange-looking code added to fix an older bug?
+
+How will I test my change?
+
+
+A SIMPLE GUIDE TO THE FILES
+
+BetterBarrowsPlugin.java:
+The main brain/state manager.
+
+BetterBarrowsConfig.java:
+User settings.
+
+BetterBarrowsBrother.java:
+Shared information about the six brothers.
+
+BetterBarrowsOverlay.java:
+Main world/surface drawing.
+
+BetterBarrowsHelperOverlay.java:
+Extra helper drawing such as NPCs, doors, and puzzles.
+
+BetterBarrowsHudOverlay.java:
+Small HUD information.
+
+BetterBarrowsMinimapOverlay.java:
+Minimap brother letters.
+
+
+TESTING
+
+First, make sure the project builds.
+
+On Windows this is normally:
+
+gradlew.bat clean
+gradlew.bat build
+
+If it says BUILD SUCCESSFUL, the code compiled.
+
+Then test the actual feature inside RuneLite.
+
+Both steps matter.
+
+A compiler cannot tell you whether Torag appeared at the exact time your tunnel logic expected.
+
+
+INTELLIJ SAYS A METHOD IS UNUSED
+
+Be careful.
+
+RuneLite can call methods through its event system.
+
+That means a method can be important even when IntelliJ cannot see a normal Java call to it.
+
+Check for RuneLite event subscription code before deleting it.
+
+
+USING OTHER PEOPLE'S CODE
+
+Do not copy code from another project just because it is visible on GitHub.
+
+First check the licence.
+
+If code is copied or adapted, record where it came from and follow its licence.
+
+Update THIRD_PARTY_NOTICES.txt when necessary.
+
+
+KEEP THINGS EASY TO UNDERSTAND
+
+Clear code is valuable.
+
+A future developer should be able to understand:
+
+What this code does.
+
+Why it exists.
+
+What could break if it is removed.
+
+Comments are especially useful when they explain WHY something unusual exists.
+
+
+THANK YOU
+
+Better Barrows grew because other developers shared their work.
+
+Helping make Better Barrows easier for the next beginner to understand is a valuable contribution.

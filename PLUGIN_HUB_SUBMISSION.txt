@@ -1,0 +1,62 @@
+BETTER BARROWS - HOW THE PLUGIN HUB SUBMISSION WORKS
+
+WHAT IS THE PLUGIN HUB?
+
+The RuneLite Plugin Hub is where third-party RuneLite plugins can be distributed to RuneLite users.
+
+Official instructions:
+
+https://github.com/runelite/plugin-hub
+
+
+FIRST
+
+Finish and test Better Barrows.
+
+Push the exact tested code to:
+
+https://github.com/SquidMuncher420/Better-Barrows
+
+
+WHAT IS A COMMIT HASH?
+
+Git gives every commit a unique identifier.
+
+Think of it like a fingerprint for one exact version of the project.
+
+The Plugin Hub needs to know which exact version of Better Barrows it should build.
+
+Do not guess this value before the final tested commit exists.
+
+
+PLUGIN INFORMATION
+
+Display name:
+
+Better Barrows
+
+Author:
+
+SquidMuncher420
+
+Main plugin class:
+
+com.betterbarrows.BetterBarrowsPlugin
+
+Build type:
+
+standard
+
+
+WHY STANDARD?
+
+Better Barrows should avoid extra dependencies and custom build steps unless they are genuinely needed.
+
+RuneLite's Plugin Hub documentation explains that standard builds can use a simpler review path when the project fits the standard requirements.
+
+
+FINAL STEP
+
+Read the CURRENT RuneLite Plugin Hub instructions when you are ready to submit.
+
+Do not rely only on an old guide because Plugin Hub requirements can change.

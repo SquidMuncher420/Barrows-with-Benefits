@@ -1,0 +1,46 @@
+BETTER BARROWS - HELP AND BUG REPORTS
+
+PROJECT
+
+https://github.com/SquidMuncher420/Better-Barrows
+
+
+IF SOMETHING DOES NOT WORK
+
+Please explain the problem in simple steps.
+
+For example:
+
+1. I entered Dharok's crypt.
+2. I searched the sarcophagus.
+3. Dharok appeared.
+4. The mound still turned blue.
+5. I expected it to remain a normal non-tunnel mound.
+
+That is much more useful than only saying:
+
+"Tunnel is broken."
+
+
+USEFUL INFORMATION TO INCLUDE
+
+What you expected.
+
+What happened.
+
+Steps that make it happen.
+
+Whether it happens every time.
+
+A screenshot if the problem is visual.
+
+RuneLite logs if there was an error.
+
+Build output if the project did not compile.
+
+
+IMPORTANT
+
+Better Barrows is a third-party RuneLite plugin project.
+
+It is not maintained by the RuneLite developers.

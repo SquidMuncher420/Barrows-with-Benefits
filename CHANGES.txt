@@ -1,0 +1,84 @@
+Better Barrows - NPC target highlight update
+
+- Removed temporary door debugger and its config option.
+- Removed native side-panel tunnel-brother name recolouring and its config option.
+- Kept the blue tunnel diamond marker.
+- Added tunnel target NPC highlighting.
+- NPCs are highlighted only while their configured target is greater than zero
+  and the current kill count is below that target.
+- Once the target for an NPC type is reached, that NPC type stops highlighting.
+- Added configurable NPC highlight colour and outline width.
+- Door highlighting and puzzle-answer highlighting are retained.
+
+Tunnel detection update
+- After a sarcophagus Search creates a pending brother, the exact chat message
+  "You don't find anything." immediately marks that brother as the tunnel brother.
+- The pending search is cleared immediately afterward.
+- NPC-spawn handling remains in place for searches where the brother actually appears.
+
+Torag/false-blue tunnel fix
+- Reverted the incorrect chat-message tunnel assignment.
+- "You don't find anything." no longer marks a brother as the tunnel brother.
+- A brother can only become blue/tunnel from the actual hidden-tunnel dialogue.
+- NPC spawn still clears that sarcophagus as a non-tunnel result.
+
+Rendering update
+- Door and target-NPC helper rendering moved below RuneLite widgets, preventing
+  scene highlights from drawing over the inventory/sidebar.
+- Target NPCs now use an outline-only three-pass soft glow instead of a filled hull.
+- Highlights still disappear automatically when each configured target is reached.
+
+Optimised sarcophagus/tunnel detection
+- Search is the only action that starts tunnel detection.
+- The searched sarcophagus becomes the pending brother for five seconds.
+- Matching brother NPC spawn is authoritative non-tunnel evidence and clears pending.
+- Actual hidden-tunnel dialogue is authoritative tunnel evidence and commits immediately.
+- "You don't find anything." is treated as non-authoritative supporting evidence only;
+  it no longer creates a false blue marker or cancels the pending observation window.
+- If no matching brother NPC has spawned after five seconds, the searched brother is
+  committed as the tunnel fallback and all overlays update from the shared tunnelBrother state.
+- A new Search replaces any older pending search, preventing stale cross-room detections.
+
+Player-style NPC outline update
+- Replaced the custom convex-hull glow with RuneLite's ModelOutlineRenderer.
+- The outline now follows the actual rendered NPC model, like RuneLite player/interact outlines.
+- Uses the existing configurable colour and width with feather 2.
+- Once a target count is reached, that NPC type stops being outlined.
+
+NPC outline repair
+- Fixed the model outline lifecycle: ModelOutlineRenderer is now called from the
+  overlay render pass every frame, matching RuneLite's native Interact Highlight pattern.
+- Removed the incorrect GameTick-only outline drawing.
+- Target completion logic remains in the plugin and is queried by the overlay.
+- Config-panel fonts are intentionally not modified: RuneLite ConfigPanel itself
+  assigns RuneScape fonts to section headers and owns the native spinner/color controls.
+
+Reliable tunnel kill tracking
+- Tunnel monster deaths are now validated from the dying NPC's own world location,
+  rather than the player's location at the exact ActorDeath callback.
+- Added identity-based de-duplication so one NPC can increment its counter only once.
+- Added one shared tunnel-NPC classifier for Bloodworm, Crypt rat, Giant crypt rat,
+  Crypt spider, Giant crypt spider and Skeleton.
+- NPC outline target recognition and kill-counter recognition now share that classifier.
+- Per-run de-duplication state is cleared with the run counters and on shutdown.
+
+Barrows chest total value
+- Opening/searching the Barrows chest snapshots the inventory immediately before loot.
+- The following inventory update is diffed against that snapshot.
+- Only positive item gains are valued, so existing inventory stacks are handled correctly.
+- Every gained stack is valued with RuneLite ItemManager prices and summed into one total.
+- One game-chat message is emitted: "Better Barrows: Total chest value: X gp".
+- The pending valuation expires after five game ticks to prevent unrelated later inventory
+  changes from being mistaken for Barrows loot.
+- No kill-time chest-value messages were added.
+
+Compile fix
+- Switched InventoryID import to net.runelite.api.gameval.InventoryID.
+- Keeps InventoryID.INV for the player's inventory, matching current RuneLite source.
+
+Minimap brother letters
+- Added D/A/V/T/K/G minimap initials at the centres of the existing mound rectangles.
+- Coordinates come from BetterBarrowsBrother's existing surface data, so minimap and world overlay stay aligned.
+- Status colours match the mound overlay: tunnel colour has priority, then killed, then alive.
+- Uses Arial Bold 12 and RuneLite's Perspective.localToMinimap conversion.
+- Existing chest total value, reliable tunnel kill tracking, model outlines, doors, puzzle helper and tunnel detection retained.

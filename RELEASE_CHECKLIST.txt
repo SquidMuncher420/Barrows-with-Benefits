@@ -1,0 +1,122 @@
+BETTER BARROWS - PUBLIC RELEASE CHECKLIST
+
+DO NOT PANIC
+
+This looks like a long list because it is designed to stop simple mistakes before a public release.
+
+Work through it one item at a time.
+
+
+STEP 1 - BUILD THE PROJECT
+
+Run:
+
+gradlew.bat clean
+gradlew.bat build
+
+Look for:
+
+BUILD SUCCESSFUL
+
+If the build fails, fix that before publishing.
+
+
+STEP 2 - RUN IT IN RUNELITE
+
+A successful build does not prove the plugin works correctly in-game.
+
+Start the development client and test the actual plugin.
+
+
+STEP 3 - TEST THE SURFACE
+
+Check all six mound areas.
+
+Check all six names.
+
+Check alive colour.
+
+Check killed colour.
+
+Check tunnel colour.
+
+Check that tunnel colour has the intended priority.
+
+
+STEP 4 - TEST THE MINIMAP
+
+Check:
+
+D for Dharok.
+A for Ahrim.
+V for Verac.
+T for Torag.
+K for Karil.
+G for Guthan.
+
+Make sure the letters are in the correct places.
+
+
+STEP 5 - TEST TUNNEL DETECTION
+
+Search a normal sarcophagus and confirm the spawned brother is handled correctly.
+
+Find the real tunnel and confirm the correct crypt is remembered.
+
+
+STEP 6 - TEST TUNNEL MONSTERS
+
+Test each supported monster type.
+
+Make sure one kill adds one count.
+
+Make sure the target outline disappears when the configured target is reached.
+
+
+STEP 7 - TEST DOORS AND PUZZLE HELP
+
+Check tunnel door highlights.
+
+Check puzzle answer highlighting.
+
+Make sure Better Barrows does not automatically click either one.
+
+
+STEP 8 - TEST THE CHEST
+
+Loot the chest.
+
+Check that the total appears once.
+
+Test with existing rune stacks.
+
+Make sure the plugin values only newly gained items.
+
+
+STEP 9 - CHECK DOCUMENTATION AND LICENCES
+
+Read THIRD_PARTY_NOTICES.txt.
+
+Make sure any source code copied or adapted from another project has the required licence/credit.
+
+Make sure the Better Barrows repository has its final LICENSE file.
+
+
+STEP 10 - PUSH THE TESTED VERSION
+
+Push the exact tested source to:
+
+https://github.com/SquidMuncher420/Better-Barrows
+
+The final Git commit gets a unique commit hash.
+
+The Plugin Hub submission should point to the exact commit you tested.
+
+
+STEP 11 - PLUGIN HUB
+
+Follow the current official instructions here:
+
+https://github.com/runelite/plugin-hub
+
+Plugin Hub requirements can change, so always read the current instructions when submitting.

@@ -1,0 +1,14 @@
+Better Barrows tunnel detection workflow
+
+1. Player uses Search on a known Barrows sarcophagus.
+2. Plugin records that sarcophagus's brother and a five-second deadline.
+3. During the observation window:
+   - Matching brother NPC spawns -> normal encounter; clear pending.
+   - Hidden-tunnel dialogue appears -> tunnel confirmed; set tunnel brother immediately.
+   - "You don't find anything." -> do not decide by this message alone.
+4. Deadline expires with no matching brother spawn -> tunnel fallback; set tunnel brother.
+5. setTunnelBrother updates the single shared tunnelBrother state used by the overlays.
+6. Any new Search replaces the previous pending search.
+
+This avoids the earlier Torag false-positive while still displaying a tunnel result when
+the hidden-tunnel widget is missed but no brother spawns.
