@@ -776,14 +776,14 @@ public class BarrowsWithBenefitsPlugin extends Plugin
         }
 
         // Clean up markers/tracker text written by earlier Barrows with Benefits builds.
-        cleanBetterBarrowsText(brothersWidget);
+        cleanLegacyPluginText(brothersWidget);
 
         // Apply the tunnel brother colour once per game tick, after the game has
         // updated the native Barrows list. Doing this in the overlay render loop
         // caused the name to flicker between Jagex white and our blue.
     }
 
-    private void cleanBetterBarrowsText(Widget widget)
+    private void cleanLegacyPluginText(Widget widget)
     {
         if (widget == null)
         {
@@ -806,12 +806,12 @@ public class BarrowsWithBenefitsPlugin extends Plugin
             }
         }
 
-        cleanBetterBarrowsChildren(widget.getDynamicChildren());
-        cleanBetterBarrowsChildren(widget.getStaticChildren());
-        cleanBetterBarrowsChildren(widget.getNestedChildren());
+        cleanLegacyPluginChildren(widget.getDynamicChildren());
+        cleanLegacyPluginChildren(widget.getStaticChildren());
+        cleanLegacyPluginChildren(widget.getNestedChildren());
     }
 
-    private void cleanBetterBarrowsChildren(Widget[] children)
+    private void cleanLegacyPluginChildren(Widget[] children)
     {
         if (children == null)
         {
@@ -820,7 +820,7 @@ public class BarrowsWithBenefitsPlugin extends Plugin
 
         for (Widget child : children)
         {
-            cleanBetterBarrowsText(child);
+            cleanLegacyPluginText(child);
         }
     }
 
