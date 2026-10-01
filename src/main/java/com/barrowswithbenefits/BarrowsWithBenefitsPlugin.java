@@ -157,9 +157,6 @@ public class BarrowsWithBenefitsPlugin extends Plugin
     private OverlayManager overlayManager;
 
     private BarrowsBrotherLocationData pendingBrother;
-    private Map<Integer, Integer> previousInventory = new HashMap<>();
-    private boolean barrowsChestLootPending;
-    private int chestLootPendingTicks;
     private long pendingBrotherDeadlineNanos;
     private BarrowsBrotherLocationData tunnelBrother;
     private Widget puzzleAnswer;
@@ -195,7 +192,6 @@ public class BarrowsWithBenefitsPlugin extends Plugin
         clientThread.invokeLater(() ->
         {
             loadPersistedMemory();
-            snapshotInventory();
         });
     }
 
@@ -210,9 +206,6 @@ public class BarrowsWithBenefitsPlugin extends Plugin
         barrowsDoors.clear();
         puzzleAnswer = null;
         countedTunnelNpcDeaths.clear();
-        previousInventory.clear();
-        barrowsChestLootPending = false;
-        chestLootPendingTicks = 0;
     }
 
     @Subscribe
@@ -220,17 +213,6 @@ public class BarrowsWithBenefitsPlugin extends Plugin
     {
         String rawOption = Text.removeTags(event.getMenuOption()).trim();
         String rawTarget = Text.removeTags(event.getMenuTarget()).trim();
-
-        // Arm chest valuation before RuneLite receives the resulting inventory update.
-        // Barrows chest actions commonly appear as Search/Open on a chest target.
-        if (getCurrentRegionId() == CRYPT_REGION_ID
-                && ("Search".equalsIgnoreCase(rawOption) || "Open".equalsIgnoreCase(rawOption))
-                && rawTarget.toLowerCase().contains("chest"))
-        {
-            snapshotInventory();
-            barrowsChestLootPending = true;
-            chestLootPendingTicks = 5;
-        }
 
         if (!isGameObjectAction(event.getMenuAction()))
         {
@@ -342,76 +324,6 @@ public class BarrowsWithBenefitsPlugin extends Plugin
     }
 
 
-    @Subscribe
-    public void onItemContainerChanged(ItemContainerChanged event)
-    {
-        if (event.getContainerId() != InventoryID.INV)
-        {
-            return;
-        }
-
-        Map<Integer, Integer> current = inventoryQuantities(event.getItemContainer());
-
-        if (barrowsChestLootPending)
-        {
-            long totalValue = calculatePositiveInventoryDeltaValue(previousInventory, current);
-            if (totalValue > 0)
-            {
-                client.addChatMessage(
-                        ChatMessageType.GAMEMESSAGE,
-                        "",
-                        "Barrows with Benefits: Total chest value: "
-                                + QuantityFormatter.formatNumber(totalValue) + " gp",
-                        null);
-                barrowsChestLootPending = false;
-                chestLootPendingTicks = 0;
-            }
-        }
-
-        previousInventory = current;
-    }
-
-    private void snapshotInventory()
-    {
-        ItemContainer inventory = client.getItemContainer(InventoryID.INV);
-        previousInventory = inventoryQuantities(inventory);
-    }
-
-    private Map<Integer, Integer> inventoryQuantities(ItemContainer container)
-    {
-        Map<Integer, Integer> quantities = new HashMap<>();
-        if (container == null)
-        {
-            return quantities;
-        }
-
-        for (Item item : container.getItems())
-        {
-            if (item != null && item.getId() > 0 && item.getQuantity() > 0)
-            {
-                quantities.merge(item.getId(), item.getQuantity(), Integer::sum);
-            }
-        }
-        return quantities;
-    }
-
-    private long calculatePositiveInventoryDeltaValue(
-            Map<Integer, Integer> before,
-            Map<Integer, Integer> after)
-    {
-        long total = 0L;
-        for (Map.Entry<Integer, Integer> entry : after.entrySet())
-        {
-            int itemId = entry.getKey();
-            int gained = entry.getValue() - before.getOrDefault(itemId, 0);
-            if (gained > 0)
-            {
-                total += itemManager.getItemPrice(itemId) * (long) gained;
-            }
-        }
-        return total;
-    }
-
 
     @Subscribe
     public void onGameStateChanged(GameStateChanged event)
@@ -471,12 +383,15 @@ public class BarrowsWithBenefitsPlugin extends Plugin
             return;
         }
 
-        // The official Barrows Brothers plugin uses this interface to identify
-        // the local player's Barrows reward screen. Unlike scene-object changes,
-        // this cannot be triggered by another player opening the shared chest.
+        // The reward interface is populated with the exact contents of this
+        // player's Barrows chest. Read that reward container directly instead
+        // of trying to infer loot from inventory deltas; this correctly handles
+        // rune stacks (including Blood runes) and items already present in the
+        // player's inventory.
         if (event.getGroupId() == InterfaceID.BARROWS_REWARD)
         {
             resetMemory();
+            showChestValue();
         }
     }
 
@@ -492,13 +407,6 @@ public class BarrowsWithBenefitsPlugin extends Plugin
     @Subscribe
     public void onGameTick(GameTick event)
     {
-        if (barrowsChestLootPending && --chestLootPendingTicks <= 0)
-        {
-            barrowsChestLootPending = false;
-            chestLootPendingTicks = 0;
-            snapshotInventory();
-        }
-
         syncKilledBrothersFromVarbits();
 
         if (isInBarrowsTunnel() && barrowsDoors.isEmpty())
@@ -578,6 +486,33 @@ public class BarrowsWithBenefitsPlugin extends Plugin
         if (changed)
         {
         }
+    }
+
+    private void showChestValue()
+    {
+        ItemContainer rewardContainer = client.getItemContainer(InventoryID.TRAIL_REWARDINV);
+        if (rewardContainer == null)
+        {
+            return;
+        }
+
+        long totalValue = 0L;
+        for (Item item : rewardContainer.getItems())
+        {
+            if (item == null || item.getId() <= 0 || item.getQuantity() <= 0)
+            {
+                continue;
+            }
+
+            totalValue += itemManager.getItemPrice(item.getId()) * (long) item.getQuantity();
+        }
+
+        client.addChatMessage(
+                ChatMessageType.ITEM_EXAMINE,
+                "",
+                "Barrows with Benefits: Total chest value: "
+                        + QuantityFormatter.formatNumber(totalValue) + " gp",
+                null);
     }
 
     private void resetMemory()
