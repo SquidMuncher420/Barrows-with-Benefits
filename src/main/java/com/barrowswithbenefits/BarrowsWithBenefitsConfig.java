@@ -238,7 +238,7 @@ public interface BarrowsWithBenefitsConfig extends Config
         section = TUNNEL_HUD_SECTION,
         position = 1
     )
-    default int tunnelDiamondOffset() { return 10; }
+    default int tunnelDiamondOffset() { return 18; }
 
     @ConfigItem(
         keyName = "colorRewardPotential",
