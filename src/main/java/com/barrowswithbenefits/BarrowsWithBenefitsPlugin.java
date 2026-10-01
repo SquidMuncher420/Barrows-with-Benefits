@@ -31,7 +31,6 @@ import net.runelite.api.events.ActorDeath;
 import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
-import net.runelite.api.events.ItemContainerChanged;
 import net.runelite.api.events.MenuOptionClicked;
 import net.runelite.api.events.NpcSpawned;
 import net.runelite.api.events.WidgetLoaded;
@@ -212,8 +211,6 @@ public class BarrowsWithBenefitsPlugin extends Plugin
     public void onMenuOptionClicked(MenuOptionClicked event)
     {
         String rawOption = Text.removeTags(event.getMenuOption()).trim();
-        String rawTarget = Text.removeTags(event.getMenuTarget()).trim();
-
         if (!isGameObjectAction(event.getMenuAction()))
         {
             return;
