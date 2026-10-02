@@ -5,7 +5,9 @@
 package com.barrowswithbenefits;
 
 import com.google.inject.Provides;
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.List;
 import java.util.EnumSet;
 import java.util.IdentityHashMap;
 import java.util.HashMap;
@@ -27,7 +29,9 @@ import net.runelite.api.Scene;
 import net.runelite.api.Tile;
 import net.runelite.api.WallObject;
 import net.runelite.api.WorldView;
+import net.runelite.api.coords.WorldPoint;
 import net.runelite.api.events.ActorDeath;
+import net.runelite.api.events.BeforeRender;
 import net.runelite.api.events.ChatMessage;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
@@ -96,11 +100,12 @@ public class BarrowsWithBenefitsPlugin extends Plugin
     private static final int ABOVE_GROUND_REGION_ID = 14131;
     private static final int CRYPT_REGION_ID = 14231;
 
-
     private static final long PENDING_SARCOPHAGUS_TIMEOUT_NANOS = 5_000_000_000L;
+
     private static final String TUNNEL_BROTHER_CONFIG_KEY = "rememberedTunnelBrother";
     private static final String EMPTY_BROTHERS_CONFIG_KEY = "emptySarcophagi";
     private static final String KILLED_BROTHERS_CONFIG_KEY = "killedBrothers";
+    private static final String CHEST_LOOTED_CONFIG_KEY = "lastBarrowsActionWasChestLoot";
 
     private static final String HIDDEN_TUNNEL_PROMPT =
             "You've found a hidden tunnel, do you want to enter?";
@@ -141,16 +146,14 @@ public class BarrowsWithBenefitsPlugin extends Plugin
 
     @Inject
     private BarrowsOverlay overlay;
-
-    @Inject
-    private BarrowsHudOverlay hudOverlay;
-
     @Inject
     private BarrowsHelperOverlay helperOverlay;
 
     @Inject
     private BarrowsMinimapOverlay minimapOverlay;
 
+    @Inject
+    private BarrowsTrackerOverlay trackerOverlay;
 
     @Inject
     private OverlayManager overlayManager;
@@ -158,6 +161,7 @@ public class BarrowsWithBenefitsPlugin extends Plugin
     private BarrowsBrotherLocationData pendingBrother;
     private long pendingBrotherDeadlineNanos;
     private BarrowsBrotherLocationData tunnelBrother;
+    private WorldPoint brotherOrderHintPoint;
     private Widget puzzleAnswer;
     private final Set<BarrowsBrotherLocationData> emptyBrothers = EnumSet.noneOf(BarrowsBrotherLocationData.class);
     private final Set<BarrowsBrotherLocationData> killedBrothers = EnumSet.noneOf(BarrowsBrotherLocationData.class);
@@ -184,9 +188,9 @@ public class BarrowsWithBenefitsPlugin extends Plugin
     protected void startUp()
     {
         overlayManager.add(overlay);
-        overlayManager.add(hudOverlay);
         overlayManager.add(helperOverlay);
         overlayManager.add(minimapOverlay);
+        overlayManager.add(trackerOverlay);
 
         clientThread.invokeLater(() ->
         {
@@ -198,9 +202,17 @@ public class BarrowsWithBenefitsPlugin extends Plugin
     protected void shutDown()
     {
         overlayManager.remove(overlay);
-        overlayManager.remove(hudOverlay);
         overlayManager.remove(helperOverlay);
         overlayManager.remove(minimapOverlay);
+        overlayManager.remove(trackerOverlay);
+        setNativeBarrowsOverlayHidden(false);
+        if (brotherOrderHintPoint != null
+                && client.getHintArrowPoint() != null
+                && client.getHintArrowPoint().equals(brotherOrderHintPoint))
+        {
+            client.clearHintArrow();
+        }
+        brotherOrderHintPoint = null;
         clearPendingBrother();
         barrowsDoors.clear();
         puzzleAnswer = null;
@@ -210,7 +222,6 @@ public class BarrowsWithBenefitsPlugin extends Plugin
     @Subscribe
     public void onMenuOptionClicked(MenuOptionClicked event)
     {
-        String rawOption = Text.removeTags(event.getMenuOption()).trim();
         if (!isGameObjectAction(event.getMenuAction()))
         {
             return;
@@ -221,7 +232,7 @@ public class BarrowsWithBenefitsPlugin extends Plugin
             return;
         }
 
-        String menuOption = rawOption;
+        String menuOption = Text.removeTags(event.getMenuOption()).trim();
         if (!"Search".equalsIgnoreCase(menuOption))
         {
             return;
@@ -288,6 +299,15 @@ public class BarrowsWithBenefitsPlugin extends Plugin
         }
 
         NPC npc = (NPC) actor;
+
+        // Only count tunnel monsters killed by this player. Ignore nearby NPC deaths
+        // caused by other players or unrelated combat.
+        if (client.getLocalPlayer() == null
+                || npc.getInteracting() != null && npc.getInteracting() != client.getLocalPlayer())
+        {
+            return;
+        }
+
         String npcName = npc.getName();
 
         // Count recognised tunnel monsters by the dying NPC's own world location,
@@ -320,6 +340,156 @@ public class BarrowsWithBenefitsPlugin extends Plugin
         }
     }
 
+
+    /**
+     * Reads the Barrows reward screen's own item container directly, the same way
+     * RuneLite's bundled "Barrows Brothers" plugin does (InventoryID.TRAIL_REWARDINV,
+     * read from onWidgetLoaded when the BARROWS_REWARD interface loads). This is far
+     * more reliable than diffing the player's inventory before/after: it reports
+     * exactly what the chest gave regardless of whether the inventory was full, loot
+     * went to the bank, or runes were auto-stored into a rune pouch - all of which
+     * previously made the old before/after diff silently miss items.
+     */
+    private void reportChestLoot()
+    {
+        ItemContainer rewardContainer = client.getItemContainer(InventoryID.TRAIL_REWARDINV);
+        if (rewardContainer == null)
+        {
+            return;
+        }
+
+        Map<Integer, Integer> drops = new HashMap<>();
+        for (Item item : rewardContainer.getItems())
+        {
+            if (item != null && item.getId() > 0 && item.getQuantity() > 0)
+            {
+                drops.merge(item.getId(), item.getQuantity(), Integer::sum);
+            }
+        }
+
+        if (drops.isEmpty())
+        {
+            return;
+        }
+
+        long totalGeValue = 0L;
+        long totalHaValue = 0L;
+
+        for (Map.Entry<Integer, Integer> entry : drops.entrySet())
+        {
+            int itemId = entry.getKey();
+            int quantity = entry.getValue();
+            totalGeValue += (long) itemManager.getItemPrice(itemId) * quantity;
+            totalHaValue += (long) itemManager.getItemComposition(itemId).getHaPrice() * quantity;
+        }
+
+        if (config.showChestValue())
+        {
+            String chestValueMessage =
+                    "Total Chest Value: " + QuantityFormatter.formatNumber(totalGeValue) + " gp";
+            if (isHighValue(totalGeValue))
+            {
+                chestValueMessage = "<col=ff0000>" + chestValueMessage + "</col>";
+            }
+
+            client.addChatMessage(
+                    ChatMessageType.GAMEMESSAGE,
+                    "",
+                    chestValueMessage,
+                    null);
+        }
+
+        if (config.showChestHaValue())
+        {
+            client.addChatMessage(
+                    ChatMessageType.GAMEMESSAGE,
+                    "",
+                    "HA Value: " + QuantityFormatter.formatNumber(totalHaValue) + " gp",
+                    null);
+        }
+
+        if (config.showChestDrops())
+        {
+            for (Map.Entry<Integer, Integer> entry : drops.entrySet())
+            {
+                int itemId = entry.getKey();
+                int quantity = entry.getValue();
+                String itemName = itemManager.getItemComposition(itemId).getName();
+                long dropValue = (long) itemManager.getItemPrice(itemId) * quantity;
+
+                if (!shouldShowChestDrop(itemName))
+                {
+                    continue;
+                }
+
+                String dropMessage = itemName + " x" + QuantityFormatter.formatNumber(quantity);
+                if (config.showChestDropValues())
+                {
+                    dropMessage += " (" + QuantityFormatter.formatNumber(dropValue) + " gp)";
+                }
+
+                // Keep high-value colouring based on the item's real value even
+                // when the numeric value itself is hidden.
+                if (isHighValue(dropValue))
+                {
+                    dropMessage = "<col=ff0000>" + dropMessage + "</col>";
+                }
+
+                client.addChatMessage(
+                        ChatMessageType.GAMEMESSAGE,
+                        "",
+                        dropMessage,
+                        null);
+            }
+        }
+    }
+
+    private boolean shouldShowChestDrop(String itemName)
+    {
+        if (itemName == null)
+        {
+            return false;
+        }
+
+        String normalizedName = itemName.trim().toLowerCase(java.util.Locale.ROOT);
+
+        // Hide list always wins.
+        if (filterContainsItem(config.chestDropHideFilter(), normalizedName))
+        {
+            return false;
+        }
+
+        String include = config.chestDropIncludeFilter();
+        // Blank include list means "show everything except hidden items".
+        return include == null
+                || include.trim().isEmpty()
+                || filterContainsItem(include, normalizedName);
+    }
+
+    private static boolean filterContainsItem(String filter, String normalizedItemName)
+    {
+        if (filter == null || filter.trim().isEmpty())
+        {
+            return false;
+        }
+
+        for (String entry : filter.split(","))
+        {
+            String wanted = entry.trim().toLowerCase(java.util.Locale.ROOT);
+            if (!wanted.isEmpty() && wanted.equals(normalizedItemName))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private boolean isHighValue(long value)
+    {
+        int threshold = config.highValueThreshold();
+        return threshold > 0 && value >= threshold;
+    }
 
 
     @Subscribe
@@ -380,15 +550,19 @@ public class BarrowsWithBenefitsPlugin extends Plugin
             return;
         }
 
-        // The reward interface is populated with the exact contents of this
-        // player's Barrows chest. Read that reward container directly instead
-        // of trying to infer loot from inventory deltas; this correctly handles
-        // rune stacks (including Blood runes) and items already present in the
-        // player's inventory.
+        // The official Barrows Brothers plugin uses this interface to identify
+        // the local player's Barrows reward screen. Unlike scene-object changes,
+        // this cannot be triggered by another player opening the shared chest.
         if (event.getGroupId() == InterfaceID.BARROWS_REWARD)
         {
+            reportChestLoot();
+
+            // Looting the reward chest is the definitive end of this run.
+            // Remember that fact across POH/Ferox/bank teleports and even a
+            // client restart so returning to Barrows cannot restore stale kills.
             resetMemory();
-            showChestValue();
+            markChestLooted();
+            lastObservedBrotherKills = -1;
         }
     }
 
@@ -426,7 +600,8 @@ public class BarrowsWithBenefitsPlugin extends Plugin
             clearPendingBrother();
         }
 
-        updateBarrowsBrothersWidget();
+        inferTunnelBrotherFromKills();
+        updateBrotherOrderHintArrow();
     }
 
 
@@ -438,9 +613,7 @@ public class BarrowsWithBenefitsPlugin extends Plugin
             return;
         }
 
-        clientThread.invokeLater(() ->
-        {
-        });
+        clientThread.invokeLater(this::updateBrotherOrderHintArrow);
     }
 
     Widget getPuzzleAnswer()
@@ -463,6 +636,164 @@ public class BarrowsWithBenefitsPlugin extends Plugin
         return killedBrothers.contains(brother);
     }
 
+    List<BarrowsBrotherLocationData> getEffectiveBrotherOrder()
+    {
+        List<BarrowsBrotherLocationData> ordered = new ArrayList<>();
+        String configured = config.brotherKillOrder();
+
+        if (configured != null)
+        {
+            for (String token : configured.split(","))
+            {
+                String name = token.trim();
+                for (BarrowsBrotherLocationData brother : BarrowsBrotherLocationData.values())
+                {
+                    if (brother.getDisplayName().equalsIgnoreCase(name) && !ordered.contains(brother))
+                    {
+                        ordered.add(brother);
+                        break;
+                    }
+                }
+            }
+        }
+
+        // Never lose a brother because of a typo/incomplete custom order.
+        for (BarrowsBrotherLocationData brother : BarrowsBrotherLocationData.values())
+        {
+            if (!ordered.contains(brother))
+            {
+                ordered.add(brother);
+            }
+        }
+
+        // The discovered/inferred tunnel brother is always forced to the end.
+        if (tunnelBrother != null)
+        {
+            ordered.remove(tunnelBrother);
+            ordered.add(tunnelBrother);
+        }
+
+        return ordered;
+    }
+
+    BarrowsBrotherLocationData getNextBrotherInOrder()
+    {
+        for (BarrowsBrotherLocationData brother : getEffectiveBrotherOrder())
+        {
+            // The tunnel brother is intentionally never selected as a surface
+            // target. It remains last in the HUD and is fought in the tunnels.
+            if (brother == tunnelBrother)
+            {
+                continue;
+            }
+            if (!isBrotherKilled(brother) && !isBrotherEmpty(brother))
+            {
+                return brother;
+            }
+        }
+        return null;
+    }
+
+    BarrowsBrotherLocationData getNextBrotherHintTarget()
+    {
+        BarrowsBrotherLocationData surface = getNextBrotherInOrder();
+        if (surface != null)
+        {
+            return surface;
+        }
+
+        // Once every non-tunnel brother is complete, the final target is the
+        // tunnel brother itself. This keeps the native flashing hint arrow
+        // useful for the sixth/final brother instead of disappearing.
+        if (tunnelBrother != null && !isBrotherKilled(tunnelBrother))
+        {
+            return tunnelBrother;
+        }
+
+        return null;
+    }
+
+    private void updateBrotherOrderHintArrow()
+    {
+        Player player = client.getLocalPlayer();
+        if (player == null || player.getWorldLocation() == null
+                || !config.showBrotherOrderHintArrow())
+        {
+            clearBrotherOrderHintArrow();
+            return;
+        }
+
+        BarrowsBrotherLocationData targetBrother = getNextBrotherHintTarget();
+        if (targetBrother == null)
+        {
+            clearBrotherOrderHintArrow();
+            return;
+        }
+
+        boolean targetIsTunnelBrother = targetBrother == tunnelBrother;
+        boolean onSurface = player.getWorldLocation().getRegionID() == ABOVE_GROUND_REGION_ID
+                && player.getWorldLocation().getPlane() == 0;
+
+        // IMPORTANT: after five brothers are dead, the sixth/tunnel brother's
+        // SURFACE MOUND is still the next place the player must visit to enter
+        // the tunnel. Keep the native flashing arrow on that mound.
+        if (onSurface)
+        {
+            int centreX = 3520 + targetBrother.getSurfaceRegionX()
+                    + (targetBrother.getSurfaceDigWidth() - 1) / 2;
+            int centreY = 3264 + targetBrother.getSurfaceRegionY()
+                    + (targetBrother.getSurfaceDigHeight() - 1) / 2;
+            WorldPoint target = new WorldPoint(centreX, centreY, 0);
+            client.setHintArrow(target);
+            brotherOrderHintPoint = target;
+            return;
+        }
+
+        if (targetIsTunnelBrother && isInTunnelMaze())
+        {
+            // Once inside, switch from the mound to the actual final brother
+            // whenever it has spawned.
+            for (NPC npc : client.getTopLevelWorldView().npcs())
+            {
+                if (npc != null && targetBrother.matchesNpcName(npc.getName()))
+                {
+                    client.setHintArrow(npc);
+                    brotherOrderHintPoint = null;
+                    return;
+                }
+            }
+
+            // Until the final brother spawns, point toward the central chest room.
+            WorldPoint tunnelTarget = new WorldPoint(
+                    3551, 9694, player.getWorldLocation().getPlane());
+            client.setHintArrow(tunnelTarget);
+            brotherOrderHintPoint = tunnelTarget;
+            return;
+        }
+
+        clearBrotherOrderHintArrow();
+    }
+
+    private void clearBrotherOrderHintArrow()
+    {
+        // Only clear coordinate arrows we know we set. NPC arrows are cleared
+        // once our final target is complete or the plugin shuts down.
+        if (brotherOrderHintPoint != null
+                && client.getHintArrowPoint() != null
+                && client.getHintArrowPoint().equals(brotherOrderHintPoint))
+        {
+            client.clearHintArrow();
+        }
+        else if (brotherOrderHintPoint == null
+                && tunnelBrother != null
+                && isBrotherKilled(tunnelBrother)
+                && client.hasHintArrow())
+        {
+            client.clearHintArrow();
+        }
+        brotherOrderHintPoint = null;
+    }
+
     private void setTunnelBrother(BarrowsBrotherLocationData brother)
     {
         if (brother == null)
@@ -483,33 +814,6 @@ public class BarrowsWithBenefitsPlugin extends Plugin
         if (changed)
         {
         }
-    }
-
-    private void showChestValue()
-    {
-        ItemContainer rewardContainer = client.getItemContainer(InventoryID.TRAIL_REWARDINV);
-        if (rewardContainer == null)
-        {
-            return;
-        }
-
-        long totalValue = 0L;
-        for (Item item : rewardContainer.getItems())
-        {
-            if (item == null || item.getId() <= 0 || item.getQuantity() <= 0)
-            {
-                continue;
-            }
-
-            totalValue += itemManager.getItemPrice(item.getId()) * (long) item.getQuantity();
-        }
-
-        client.addChatMessage(
-                ChatMessageType.ITEM_EXAMINE,
-                "",
-                "Barrows with Benefits: Total chest value: "
-                        + QuantityFormatter.formatNumber(totalValue) + " gp",
-                null);
     }
 
     private void resetMemory()
@@ -623,12 +927,49 @@ public class BarrowsWithBenefitsPlugin extends Plugin
 
     private void markBrotherKilled(BarrowsBrotherLocationData brother)
     {
-        if (brother == null || !killedBrothers.add(brother))
+        if (brother == null)
+        {
+            return;
+        }
+
+        // If the previous Barrows action was looting the chest, this kill is
+        // the first confirmed kill of a brand-new run. Clear any stale state
+        // before recording it.
+        if (wasChestLooted())
+        {
+            resetMemory();
+            clearChestLootedMarker();
+            lastObservedBrotherKills = 0;
+        }
+
+        if (!killedBrothers.add(brother))
         {
             return;
         }
 
         persistKilledBrothers();
+    }
+
+    private void markChestLooted()
+    {
+        configManager.setRSProfileConfiguration(
+                BarrowsWithBenefitsConfig.GROUP,
+                CHEST_LOOTED_CONFIG_KEY,
+                "true");
+    }
+
+    private boolean wasChestLooted()
+    {
+        return "true".equalsIgnoreCase(configManager.getRSProfileConfiguration(
+                BarrowsWithBenefitsConfig.GROUP,
+                CHEST_LOOTED_CONFIG_KEY));
+    }
+
+    private void clearChestLootedMarker()
+    {
+        configManager.unsetRSProfileConfiguration(
+                BarrowsWithBenefitsConfig.GROUP,
+                CHEST_LOOTED_CONFIG_KEY);
     }
 
     private void persistKilledBrothers()
@@ -756,12 +1097,84 @@ public class BarrowsWithBenefitsPlugin extends Plugin
         }
     }
 
+    /**
+     * Jagex unhides the Barrows widgets during its own interface update. Match
+     * RuneLite's official Barrows plugin and hide both widgets immediately
+     * before every render, so the vanilla HUD cannot flash back on screen.
+     */
+    @Subscribe
+    public void onBeforeRender(BeforeRender event)
+    {
+        setNativeBarrowsOverlayHidden(isInBarrowsArea());
+    }
+
+    private void setNativeBarrowsOverlayHidden(boolean hidden)
+    {
+        Widget brothers = client.getWidget(InterfaceID.BarrowsOverlay.BROTHERS);
+        if (brothers != null)
+        {
+            brothers.setHidden(hidden);
+        }
+
+        Widget potential = client.getWidget(InterfaceID.BarrowsOverlay.KILLCOUNT);
+        if (potential != null)
+        {
+            potential.setHidden(hidden);
+        }
+    }
+
     private boolean isInBarrowsTunnel()
     {
         Player localPlayer = client.getLocalPlayer();
         return localPlayer != null
                 && localPlayer.getWorldLocation().getRegionID() == CRYPT_REGION_ID
                 && localPlayer.getWorldLocation().getPlane() != 3;
+    }
+
+    boolean isInBarrowsArea()
+    {
+        Player localPlayer = client.getLocalPlayer();
+        if (localPlayer == null || localPlayer.getWorldLocation() == null)
+        {
+            return false;
+        }
+        int region = localPlayer.getWorldLocation().getRegionID();
+        return region == ABOVE_GROUND_REGION_ID || region == CRYPT_REGION_ID;
+    }
+
+    /** If five brothers are dead, the only remaining brother must be the tunnel brother. */
+    private void inferTunnelBrotherFromKills()
+    {
+        if (tunnelBrother != null || killedBrothers.size() != 5)
+        {
+            return;
+        }
+        for (BarrowsBrotherLocationData brother : BarrowsBrotherLocationData.values())
+        {
+            if (!killedBrothers.contains(brother))
+            {
+                setTunnelBrother(brother);
+                return;
+            }
+        }
+    }
+
+    boolean areTunnelKillTargetsComplete()
+    {
+        boolean hasTarget = config.bloodwormTarget() > 0
+                || config.cryptRatTarget() > 0
+                || config.giantCryptRatTarget() > 0
+                || config.cryptSpiderTarget() > 0
+                || config.giantCryptSpiderTarget() > 0
+                || config.skeletonTarget() > 0;
+
+        return hasTarget
+                && bloodwormKills >= config.bloodwormTarget()
+                && cryptRatKills >= config.cryptRatTarget()
+                && giantCryptRatKills >= config.giantCryptRatTarget()
+                && cryptSpiderKills >= config.cryptSpiderTarget()
+                && giantCryptSpiderKills >= config.giantCryptSpiderTarget()
+                && skeletonKills >= config.skeletonTarget();
     }
 
     boolean isTunnelTargetStillNeeded(String npcName)
@@ -861,7 +1274,14 @@ public class BarrowsWithBenefitsPlugin extends Plugin
 
         if (config.showRewardPotential())
         {
-            text.append(String.format("<br><br>Reward Potential: %.1f%%", rewardPercent));
+            if (areTunnelKillTargetsComplete())
+            {
+                text.append(String.format("<br><br><col=00d83d>Reward Potential: %.1f%%</col>", rewardPercent));
+            }
+            else
+            {
+                text.append(String.format("<br><br>Reward Potential: %.1f%%", rewardPercent));
+            }
         }
 
         return text.toString();
@@ -903,6 +1323,31 @@ public class BarrowsWithBenefitsPlugin extends Plugin
         currentKills += client.getVarbitValue(Varbits.BARROWS_KILLED_KARIL) > 0 ? 1 : 0;
         currentKills += client.getVarbitValue(Varbits.BARROWS_KILLED_TORAG) > 0 ? 1 : 0;
         currentKills += client.getVarbitValue(Varbits.BARROWS_KILLED_VERAC) > 0 ? 1 : 0;
+
+        // After chest loot, OSRS can leave the previous run's Barrows varbits
+        // visible while teleporting/loading. Do not let those stale values
+        // repopulate the overlay. Once the game reports zero kills, we know the
+        // fresh run state is authoritative and normal syncing can resume.
+        if (wasChestLooted())
+        {
+            Player player = client.getLocalPlayer();
+            boolean atBarrowsSurface = player != null
+                    && player.getWorldLocation() != null
+                    && player.getWorldLocation().getRegionID() == ABOVE_GROUND_REGION_ID
+                    && player.getWorldLocation().getPlane() == 0;
+
+            if (atBarrowsSurface)
+            {
+                resetMemory();
+                lastObservedBrotherKills = 0;
+
+                if (currentKills == 0)
+                {
+                    clearChestLootedMarker();
+                }
+                return;
+            }
+        }
 
         // The reward widget is the primary reset signal. This is a safety net for
         // a missed widget event or stale persisted state: a completed/active run

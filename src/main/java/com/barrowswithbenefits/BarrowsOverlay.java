@@ -12,6 +12,10 @@ import java.awt.geom.Area;
 import javax.inject.Inject;
 import net.runelite.api.Client;
 import net.runelite.api.GameObject;
+import net.runelite.api.WallObject;
+import net.runelite.api.GroundObject;
+import net.runelite.api.DecorativeObject;
+import net.runelite.api.ObjectComposition;
 import net.runelite.api.Perspective;
 import net.runelite.api.Point;
 import net.runelite.api.Scene;
@@ -95,6 +99,10 @@ final class BarrowsOverlay extends Overlay
         {
             renderSarcophagusHulls(graphics);
         }
+
+        // The staircase renderer is kill-gated internally: it draws nothing
+        // before/during the fight and only shows the green exit after the kill.
+        renderCurrentRoomStaircase(graphics);
 
         return null;
     }
@@ -230,101 +238,311 @@ final class BarrowsOverlay extends Overlay
     {
         WorldView worldView = client.getLocalPlayer().getWorldView();
         int plane = worldView.getPlane();
+        WorldPoint player = client.getLocalPlayer().getWorldLocation();
         BarrowsBrotherLocationData tunnelBrother = plugin.getTunnelBrother();
 
-        Scene scene = worldView.getScene();
-        Tile[][][] tiles = scene.getTiles();
-        if (plane < 0 || plane >= tiles.length)
+        // Only mark the actual sarcophagus object in the crypt room the player is
+        // currently standing in. Do not paint the floor tile beneath it.
+        BarrowsBrotherLocationData currentBrother = nearestCryptBrother(player, plane, 12);
+        if (currentBrother == null)
         {
             return;
         }
 
-        Stroke previousStroke = graphics.getStroke();
-        Color previousColor = graphics.getColor();
-        graphics.setStroke(OBJECT_STROKE);
+        boolean killed = plugin.isBrotherKilled(currentBrother);
+        boolean isTunnel = currentBrother == tunnelBrother;
+        Color markerColor = isTunnel
+            ? config.tunnelHighlightColor()
+            : (config.showKillStatusColors()
+                ? (killed ? config.killedBrotherColor() : config.unkilledBrotherColor())
+                : config.unkilledBrotherColor());
 
-        for (BarrowsBrotherLocationData brother : BarrowsBrotherLocationData.values())
+        WorldPoint markerPoint = WorldPoint.fromRegion(
+            CRYPT_REGION_ID,
+            currentBrother.getCryptRegionX(),
+            currentBrother.getCryptRegionY(),
+            plane);
+        LocalPoint markerLocalPoint = LocalPoint.fromWorld(worldView, markerPoint);
+        if (markerLocalPoint == null)
         {
-            boolean isTunnel = tunnelBrother == brother;
+            return;
+        }
 
-            WorldPoint markerPoint = WorldPoint.fromRegion(
-                CRYPT_REGION_ID,
-                brother.getCryptRegionX(),
-                brother.getCryptRegionY(),
-                plane);
-            LocalPoint markerLocalPoint = LocalPoint.fromWorld(worldView, markerPoint);
-            if (markerLocalPoint == null)
+        Tile[][][] tiles = worldView.getScene().getTiles();
+        int minX = Math.max(0, markerLocalPoint.getSceneX() - 7);
+        int maxX = Math.min(tiles[plane].length - 1, markerLocalPoint.getSceneX() + 7);
+        int minY = Math.max(0, markerLocalPoint.getSceneY() - 7);
+        int maxY = Math.min(tiles[plane][0].length - 1, markerLocalPoint.getSceneY() + 7);
+
+        Stroke oldStroke = graphics.getStroke();
+        Color oldColor = graphics.getColor();
+        Font oldFont = graphics.getFont();
+
+        // Keep the sarcophagus object outline deliberately light/subtle while
+        // retaining the configured brother/tunnel colour.
+        Color outlineColor = new Color(
+            markerColor.getRed(),
+            markerColor.getGreen(),
+            markerColor.getBlue(),
+            markerColor.getAlpha());
+        graphics.setStroke(new BasicStroke(1.5f));
+
+        boolean rendered = false;
+        for (int x = minX; x <= maxX && !rendered; x++)
+        {
+            for (int y = minY; y <= maxY && !rendered; y++)
             {
-                continue;
-            }
-
-            int minSceneX = Math.max(0, markerLocalPoint.getSceneX() - 4);
-            int maxSceneX = Math.min(tiles[plane].length - 1, markerLocalPoint.getSceneX() + 4);
-            int minSceneY = Math.max(0, markerLocalPoint.getSceneY() - 4);
-            int maxSceneY = Math.min(tiles[plane][0].length - 1, markerLocalPoint.getSceneY() + 4);
-
-            boolean killed = plugin.isBrotherKilled(brother);
-            Color hullColor = isTunnel
-                ? config.tunnelHighlightColor()
-                : (config.showKillStatusColors()
-                    ? (killed ? config.killedBrotherColor() : config.unkilledBrotherColor())
-                    : config.unkilledBrotherColor());
-
-            for (int sceneX = minSceneX; sceneX <= maxSceneX; sceneX++)
-            {
-                for (int sceneY = minSceneY; sceneY <= maxSceneY; sceneY++)
+                Tile tile = tiles[plane][x][y];
+                if (tile == null || tile.getGameObjects() == null)
                 {
-                    Tile tile = tiles[plane][sceneX][sceneY];
-                    if (tile == null)
+                    continue;
+                }
+
+                for (GameObject object : tile.getGameObjects())
+                {
+                    if (object == null || !object.getSceneMinLocation().equals(tile.getSceneLocation()))
                     {
                         continue;
                     }
 
-                    GameObject[] gameObjects = tile.getGameObjects();
-                    if (gameObjects == null)
+                    ObjectComposition composition = client.getObjectDefinition(object.getId());
+                    String name = composition == null ? null : composition.getName();
+                    if (name == null || !"Sarcophagus".equalsIgnoreCase(name))
                     {
                         continue;
                     }
 
-                    for (GameObject gameObject : gameObjects)
+                    Shape hull = object.getConvexHull();
+                    if (hull != null)
                     {
-                        if (gameObject == null
-                            || gameObject.getId() != brother.getSarcophagusObjectId()
-                            || !gameObject.getSceneMinLocation().equals(tile.getSceneLocation()))
+                        OverlayUtil.renderPolygon(graphics, hull, outlineColor);
+
+                        // Put the brother name on the sarcophagus itself, rather
+                        // than on a nearby crypt floor tile.
+                        String label = currentBrother.getDisplayName();
+                        graphics.setFont(FontManager.getRunescapeBoldFont());
+                        Point text = Perspective.getCanvasTextLocation(
+                            client,
+                            graphics,
+                            object.getLocalLocation(),
+                            label,
+                            0);
+                        if (text != null)
                         {
-                            continue;
+                            OverlayUtil.renderTextLocation(graphics, text, label, markerColor);
                         }
 
-                        Shape hull = gameObject.getConvexHull();
-                        if (hull != null)
-                        {
-                            graphics.setColor(hullColor);
-                            graphics.draw(hull);
-
-                            String label = brother.getDisplayName();
-
-                            java.awt.Rectangle bounds = hull.getBounds();
-                            Font oldFont = graphics.getFont();
-                            graphics.setFont(FontManager.getRunescapeBoldFont());
-
-                            java.awt.FontMetrics metrics = graphics.getFontMetrics();
-                            int textX = bounds.x + (bounds.width - metrics.stringWidth(label)) / 2;
-                            int textY = bounds.y + (bounds.height + metrics.getAscent()) / 2;
-
-                            OverlayUtil.renderTextLocation(
-                                graphics,
-                                new Point(textX, textY),
-                                label,
-                                hullColor);
-
-                            graphics.setFont(oldFont);
-                        }
+                        rendered = true;
+                        break;
                     }
                 }
             }
         }
 
-        graphics.setStroke(previousStroke);
-        graphics.setColor(previousColor);
+        graphics.setStroke(oldStroke);
+        graphics.setColor(oldColor);
+        graphics.setFont(oldFont);
     }
+
+    /**
+     * Outline the staircase in the brother crypt the player is currently inside.
+     * Nothing is drawn for the other five rooms. We identify the staircase from
+     * its live object definition/action rather than relying on a brittle object ID.
+     */
+    private void renderCurrentRoomStaircase(Graphics2D graphics)
+    {
+        if (client.getLocalPlayer() == null)
+        {
+            return;
+        }
+
+        WorldView worldView = client.getLocalPlayer().getWorldView();
+        int plane = worldView.getPlane();
+        WorldPoint player = client.getLocalPlayer().getWorldLocation();
+        BarrowsBrotherLocationData currentBrother = nearestCryptBrother(player, plane, 16);
+
+        // No staircase marker before/during the fight.
+        if (currentBrother == null || !plugin.isBrotherKilled(currentBrother))
+        {
+            return;
+        }
+
+        final int staircaseId = getCryptStaircaseObjectId(currentBrother);
+        final Color configured = config.roomStaircaseColor();
+        final Color green = new Color(0x00, 0xFF, 0x3C, configured.getAlpha());
+        final Stroke oldStroke = graphics.getStroke();
+        final Color oldColor = graphics.getColor();
+
+        graphics.setStroke(new BasicStroke(
+                Math.max(3, config.roomStaircaseWidth()),
+                BasicStroke.CAP_ROUND,
+                BasicStroke.JOIN_ROUND));
+
+        Tile[][][] tiles = worldView.getScene().getTiles();
+
+        // Find the exact staircase object for this brother and draw its MODEL
+        // hull. We intentionally do not render a canvas tile or a nearby-object
+        // fallback: the green marker must wrap the entire staircase itself.
+        for (Tile[] row : tiles[plane])
+        {
+            if (row == null)
+            {
+                continue;
+            }
+
+            for (Tile tile : row)
+            {
+                if (tile == null)
+                {
+                    continue;
+                }
+
+                if (tile.getGameObjects() != null)
+                {
+                    for (GameObject object : tile.getGameObjects())
+                    {
+                        if (object == null || object.getId() != staircaseId)
+                        {
+                            continue;
+                        }
+
+                        Shape hull = object.getConvexHull();
+                        if (hull != null)
+                        {
+                            OverlayUtil.renderPolygon(graphics, hull, green);
+                            graphics.setStroke(oldStroke);
+                            graphics.setColor(oldColor);
+                            return;
+                        }
+
+                        // If RuneLite cannot expose a hull for this model, use
+                        // the object's full clickable shape—not its ground tile.
+                        Shape clickbox = object.getClickbox();
+                        if (clickbox != null)
+                        {
+                            OverlayUtil.renderPolygon(graphics, clickbox, green);
+                            graphics.setStroke(oldStroke);
+                            graphics.setColor(oldColor);
+                            return;
+                        }
+                    }
+                }
+
+                WallObject wall = tile.getWallObject();
+                if (wall != null && wall.getId() == staircaseId)
+                {
+                    Shape hull = wall.getConvexHull();
+                    if (hull == null)
+                    {
+                        hull = wall.getClickbox();
+                    }
+                    if (hull != null)
+                    {
+                        OverlayUtil.renderPolygon(graphics, hull, green);
+                        graphics.setStroke(oldStroke);
+                        graphics.setColor(oldColor);
+                        return;
+                    }
+                }
+
+                DecorativeObject decorative = tile.getDecorativeObject();
+                if (decorative != null && decorative.getId() == staircaseId)
+                {
+                    Shape hull = decorative.getConvexHull();
+                    if (hull == null)
+                    {
+                        hull = decorative.getClickbox();
+                    }
+                    if (hull != null)
+                    {
+                        OverlayUtil.renderPolygon(graphics, hull, green);
+                        graphics.setStroke(oldStroke);
+                        graphics.setColor(oldColor);
+                        return;
+                    }
+                }
+
+                GroundObject ground = tile.getGroundObject();
+                if (ground != null && ground.getId() == staircaseId)
+                {
+                    Shape hull = ground.getConvexHull();
+                    if (hull == null)
+                    {
+                        hull = ground.getClickbox();
+                    }
+                    if (hull != null)
+                    {
+                        OverlayUtil.renderPolygon(graphics, hull, green);
+                        graphics.setStroke(oldStroke);
+                        graphics.setColor(oldColor);
+                        return;
+                    }
+                }
+            }
+        }
+
+        graphics.setStroke(oldStroke);
+        graphics.setColor(oldColor);
+    }
+
+    private static int getCryptStaircaseObjectId(BarrowsBrotherLocationData brother)
+    {
+        switch (brother)
+        {
+            case AHRIM:
+                return 20667;
+            case DHAROK:
+                return 20668;
+            case GUTHAN:
+                return 20669;
+            case KARIL:
+                return 20670;
+            case TORAG:
+                return 20671;
+            case VERAC:
+                return 20672;
+            default:
+                return -1;
+        }
+    }
+
+    private static WorldPoint getCryptStairPoint(BarrowsBrotherLocationData brother, int plane)
+    {
+        switch (brother)
+        {
+            case AHRIM:
+                return new WorldPoint(3557, 9703, plane);
+            case DHAROK:
+                return new WorldPoint(3556, 9718, plane);
+            case GUTHAN:
+                return new WorldPoint(3534, 9704, plane);
+            case KARIL:
+                return new WorldPoint(3546, 9684, plane);
+            case TORAG:
+                return new WorldPoint(3568, 9683, plane);
+            case VERAC:
+                return new WorldPoint(3578, 9706, plane);
+            default:
+                throw new IllegalArgumentException("Unknown Barrows brother: " + brother);
+        }
+    }
+
+    private BarrowsBrotherLocationData nearestCryptBrother(WorldPoint player, int plane, int maxDistance)
+    {
+        BarrowsBrotherLocationData nearest = null;
+        int best = Integer.MAX_VALUE;
+        for (BarrowsBrotherLocationData brother : BarrowsBrotherLocationData.values())
+        {
+            WorldPoint marker = WorldPoint.fromRegion(
+                CRYPT_REGION_ID, brother.getCryptRegionX(), brother.getCryptRegionY(), plane);
+            int distance = Math.abs(player.getX() - marker.getX()) + Math.abs(player.getY() - marker.getY());
+            if (distance < best)
+            {
+                best = distance;
+                nearest = brother;
+            }
+        }
+        return best <= maxDistance ? nearest : null;
+    }
+
 }
