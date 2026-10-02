@@ -2,8 +2,6 @@
   <img src="banner.png" alt="Barrows with Benefits" width="100%">
 </p>
 
-# Barrows with Benefits
-
 Barrows with Benefits is a RuneLite plugin that brings a collection of useful Barrows helpers together in one place.
 
 The plugin is designed to help throughout an entire Barrows run: choosing and following a brother order, tracking kills, remembering the tunnel entrance, navigating the tunnel maze, completing a configurable tunnel kill plan, solving the door puzzle, and reviewing the value of your chest loot.
