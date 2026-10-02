@@ -1,3 +1,7 @@
+<p align="center">
+  <img src="banner.png" alt="Barrows with Benefits" width="100%">
+</p>
+
 # Barrows with Benefits
 
 Barrows with Benefits is a RuneLite plugin that brings a collection of useful Barrows helpers together in one place.
