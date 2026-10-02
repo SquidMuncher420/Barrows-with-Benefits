@@ -27,6 +27,10 @@ Most features can be configured individually through RuneLite, so you can use th
 - **Puzzle Helper** — Highlights the correct answer to the Barrows door puzzle.
 - **Chest Loot Information** — Can report Grand Exchange value, high-alchemy value, and individual chest drops in game chat.
 
+<p align="center">
+  <img src="features.png" alt="Barrows with Benefits" width="100%">
+</p>
+
 ---
 
 ## Brother Order
